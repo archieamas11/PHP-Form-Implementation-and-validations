@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHP-Form</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <section class="page-1">
+        <!-- personal information details -->
+        <div class="center">
+            <h1>Personal Data Form</h1>
+            <div class="container">
+                <h1>Personal Information</h1>
+                <div class="personal-info">
+                    <div class="form">
+                        <label for="lname">Last Name</label> <br>
+                        <input type="text" name="lname" id="lname" placeholder="Enter last name">
+                    </div>
+                    <div class="form">
+                        <label for="lname">First Name</label> <br>
+                        <input type="text" name="fname" id="fname" placeholder="Enter first name">
+                    </div>
+                    <div class="form">
+                        <label for="lname">Middle Initial</label> <br>
+                        <input type="text" name="mname" id="mname" placeholder="M.I.">
+                    </div>
+                    <div class="form">
+                        <label for="dob">Date of Birth</label> <br>
+                        <input type="date" name="dob" id="dob">
+                    </div>
+                    <div class="form">
+                        <label for="sex">Sex</label> <br>
+                        <div class="radio-group">
+                            <input type="radio" name="sex" id="male" value="male">
+                            <label for="male">Male</label>
+                            <input type="radio" name="sex" id="female" value="female">
+                            <label for="female">Female</label>
+                            <input type="radio" name="sex" id="other" value="other">
+                            <label for="other">Other</label>
+                        </div>
+                    </div>
+                    <div class="form">
+                        <label for="status">Civil Status</label> <br>
+                        <div class="form-group-radio">
+
+                            <select name="status" id="status">
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                                <option value="widowed">Widowed</option>
+                                <option value="divorced">Legally Seperated</option>
+                                <option value="others">Others</option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="form">
+                        <label for="tax">Tax Identification Number</label> <br>
+                        <input type="text" name="tax" id="tax" placeholder="Enter TIN">
+                    </div>
+                    <div class="form">
+                        <label for="nationality">Nationality</label> <br>
+                        <input type="text" name="nationality" id="nationality" placeholder="Enter nationality">
+                    </div>
+                    <div class="form">
+                        <label for="religion">Religion</label> <br>
+                        <input type="text" name="religion" id="religion" placeholder="Enter religion">
+                    </div>
+                </div>
+            </div>
+
+            <!-- location details -->
+            <div class="container">
+                <h1>Location Details</h1>
+                <div class="location-info">
+                    <div class="form">
+                        <label for="region">Region</label> <br>
+                        <select id="region">
+                            <option value="">Select Region</option>
+                        </select>
+                    </div>
+                    <div class="form">
+                        <label for="province">Province</label> <br>
+                        <select id="province" disabled>
+                            <option value="">Select Province</option>
+                        </select>
+                    </div>
+                    <div class="form">
+                        <label for="city">City/Municipality</label> <br>
+                        <select id="city" disabled>
+                            <option value="">Select City/Municipality</option>
+                        </select>
+                    </div>
+                    <div class="form">
+
+                        <label for="barangay">Barangay</label> <br>
+                        <select id="barangay" disabled>
+                            <option value="">Select Barangay</option>
+                        </select>
+                    </div>
+
+                    <div class="form">
+                        <label for="zip">Zip Code</label> <br>
+                        <input type="text" name="zip" id="zip" placeholder="Enter zip code">
+                    </div>
+
+                    <div class="form">
+                        <label for="complete-address">Home Address</label> <br>
+                        <input type="text" name="address" id="address" placeholder="Street Name, Building, House No.">
+                    </div>
+                </div>
+            </div>
+
+            <!-- contact details -->
+            <div class="container">
+                <h1>Contact Information</h1>
+                <div class="contact-info">
+                    <div class="form">
+                        <label for="email">Email Address</label> <br>
+                        <input type="email" name="email" id="email" placeholder="Enter email address">
+                    </div>
+                    <div class="form">
+                        <label for="phone">Phone Number</label> <br>
+                        <input type="tel" name="phone" id="phone" placeholder="Enter phone number">
+                    </div>
+                </div>
+            </div>
+            <!-- parent informatio details -->
+            <div class="container">
+                <h1>Parent Information</h1>
+                <div class="parent-info">
+                    <div class="parent">
+                        <label for="parent">Parent:</label>
+                        <input type="text" name="parent" id="parent">
+                    </div>
+                    <div class="parent-email">
+                        <label for="parent-email">Email:</label>
+                        <input type="email" name="parent-email" id="parent-email">
+                    </div>
+                    <div class="parent-phone">
+                        <label for="parent-phone">Phone:</label>
+                        <input type="tel" name="parent-phone" id="parent-phone">
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-btn">
+                <button type="submit">Submit</button>
+            </div>
+        </div>
+    </section>
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const regionSelect = document.getElementById("region");
+        const provinceSelect = document.getElementById("province");
+        const citySelect = document.getElementById("city");
+        const barangaySelect = document.getElementById("barangay");
+
+        // Fetch regions
+        fetch("https://psgc.cloud/api/regions")
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(region => {
+                    const option = document.createElement("option");
+                    option.value = region.code;
+                    option.textContent = region.name;
+                    regionSelect.appendChild(option);
+                });
+            });
+
+        // Handle region change
+        regionSelect.addEventListener("change", function () {
+            provinceSelect.innerHTML = '<option value="">Select Province</option>';
+            provinceSelect.disabled = true;
+            citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+            citySelect.disabled = true;
+            barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+            barangaySelect.disabled = true;
+
+            if (this.value) {
+                fetch(`https://psgc.cloud/api/regions/${this.value}/provinces`)
+                    .then(response => response.json())
+                    .then(data => {
+                        provinceSelect.disabled = false;
+                        data.forEach(province => {
+                            const option = document.createElement("option");
+                            option.value = province.code;
+                            option.textContent = province.name;
+                            provinceSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+
+        // Handle province change
+        provinceSelect.addEventListener("change", function () {
+            citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+            citySelect.disabled = true;
+            barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+            barangaySelect.disabled = true;
+
+            if (this.value) {
+                fetch(`https://psgc.cloud/api/provinces/${this.value}/cities-municipalities`)
+                    .then(response => response.json())
+                    .then(data => {
+                        citySelect.disabled = false;
+                        data.forEach(city => {
+                            const option = document.createElement("option");
+                            option.value = city.code;
+                            option.textContent = city.name;
+                            citySelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+
+        // Handle city change
+        citySelect.addEventListener("change", function () {
+            barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+            barangaySelect.disabled = true;
+
+            if (this.value) {
+                fetch(`https://psgc.cloud/api/cities-municipalities/${this.value}/barangays`)
+                    .then(response => response.json())
+                    .then(data => {
+                        barangaySelect.disabled = false;
+                        data.forEach(barangay => {
+                            const option = document.createElement("option");
+                            option.value = barangay.code;
+                            option.textContent = barangay.name;
+                            barangaySelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    });
+
+</script>
+
+</html>
