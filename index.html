@@ -12,7 +12,9 @@
     <section class="page-1">
         <!-- personal information details -->
         <div class="center">
-            <h1>Personal Data Form</h1>
+            <div class="title">
+                <h1>Personal Data Form</h1>
+            </div>
             <div class="container">
                 <h1>Personal Information</h1>
                 <div class="personal-info">
@@ -54,7 +56,6 @@
                                 <option value="others">Others</option>
                             </select>
                         </div>
-
                     </div>
                     <div class="form">
                         <label for="tax">Tax Identification Number</label> <br>
@@ -71,8 +72,29 @@
                 </div>
             </div>
 
-            <!-- location details -->
             <div class="container">
+                <h1>Place of Birth</h1>
+                <div class="pob-info">
+                    <div class="form">
+                        <label for="city-info">City</label> <br>
+                        <input type="text" name="city-info" id="city-info" placeholder="Enter city">
+                    </div>
+
+                    <div class="form">
+                        <label for="municipality-info">Municipality</label> <br>
+                        <input type="text" name="municipality-info" id="municipality-info"
+                            placeholder="Enter municipality">
+                    </div>
+
+                    <div class="form">
+                        <label for="province-info">Province</label> <br>
+                        <input type="text" name="province-info" id="province-info" placeholder="Enter province">
+                    </div>
+                </div>
+            </div>
+
+            <!-- location details -->
+            <div class=" container">
                 <h1>Location Details</h1>
                 <div class="location-info">
                     <div class="form">
@@ -238,7 +260,6 @@
             }
         });
     });
-
 </script>
 
 </html>
