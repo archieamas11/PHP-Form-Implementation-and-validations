@@ -242,9 +242,11 @@
         if (allFilled) {
             nextBtn.disabled = false;
             nextBtn.style.backgroundColor = '#4a90e2';
+            nextBtn.style.cursor = 'pointer';
         } else {
             nextBtn.disabled = true;
             nextBtn.style.backgroundColor = 'gray';
+            nextBtn.style.cursor = 'not-allowed';
         }
     }
 
@@ -260,5 +262,10 @@
 <script src="validation.js"></script>
 <script src="regions.js"></script>
 <script src="civil-status.js"></script>
+<script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+</script>
 
 </html>
