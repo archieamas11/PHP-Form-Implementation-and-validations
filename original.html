@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHP-Form</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .center {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    h1 {
+        color: #1a73e8;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+    }
+
+    .text-danger {
+        color: #dc3545;
+        font-weight: bold;
+        font-size: 1em;
+        vertical-align: middle;
+        display: inline-block;
+        margin-left: 2px;
+    }
+
+    .title {
+        text-align: center;
+    }
+
+    .container {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .parent-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+
+    .container h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #2d3436;
+    }
+
+    .personal-info,
+    .location-info,
+    .contact-info,
+    .parent-info,
+    .pob-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form {
+        margin-bottom: 1rem;
+    }
+
+    label {
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #555;
+        font-size: 0.9rem;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="email"],
+    input[type="tel"],
+    select {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    input:focus,
+    select:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    input::placeholder {
+        color: #999;
+    }
+
+    /* Radio Buttons */
+    .radio-group {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    input[type="radio"] {
+        margin: 0;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    input[type="radio"]+label {
+        margin: 0;
+        font-weight: normal;
+        cursor: pointer;
+        position: relative;
+        top: 1px;
+        /* Fine-tune vertical alignment */
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    button[type="submit"] {
+        background-color: #1a73e8;
+        color: white;
+        padding: 1rem 3rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #1557b0;
+        transform: translateY(-2px);
+    }
+
+    /* Location Selects */
+    select {
+        appearance: none;
+        padding: 0.8rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        width: 100%;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23555"><path d="M7 10l5 5 5-5H7z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 0.7em top 50%, 0 0;
+        background-size: 0.65em auto, 100%;
+    }
+
+    select:disabled {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+    }
+
+    /* Parent Information */
+    .parent-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .parent-container {
+            flex-direction: column;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+
+        }
+    }
+</style>
+
+<body>
+    <section class="page-1">
+        <!-- personal information details -->
+        <div class="center">
+            <div class="title">
+                <h1>Personal Data Form</h1>
+            </div>
+            <div class="container">
+                <h1>Personal Information</h1>
+                <div class="personal-info">
+                    <div class="form">
+                        <label for="lname">Last Name <span class="text-danger">*</span></label> <br>
+                        <input type="text" name="lname" id="lname" placeholder="Enter last name" required>
+                        <span class="error" id="lastNameError"></span>
+                    </div>
+                    <div class="form">
+                        <label for="lname">First Name <span class="text-danger">*</span></label> <br>
+                        <input type="text" name="fname" id="fname" placeholder="Enter first name" required>
+                    </div>
+                    <div class="form">
+                        <label for="lname">Middle Initial</label> <br>
+                        <input type="text" name="mname" id="mname" placeholder="M.I.">
+                    </div>
+                    <div class="form">
+                        <label for="dob">Date of Birth <span class="text-danger">*</span></label> <br>
+                        <input type="date" name="dob" id="dob" required>
+                    </div>
+                    <div class="form">
+                        <label for="religion">Place of Birth <span class="text-danger">*</span></label> <br>
+                        <input type="text" name="pob" id="pob" placeholder="Enter place of birth" required>
+                    </div>
+                    <div class="form">
+                        <label>Sex <span class="text-danger">*</span></label> <br>
+                        <div class="radio-group">
+                            <input type="radio" name="sex" id="male" value="male" required>
+                            <label for="male">Male</label>
+                            <input type="radio" name="sex" id="female" value="female">
+                            <label for="female">Female</label>
+                            <input type="radio" name="sex" id="other" value="other">
+                            <label for="other">Other</label>
+                        </div>
+                    </div>
+                    <div class="form">
+                        <label for="status">Civil Status <span class="text-danger">*</span></label> <br>
+                        <div class="form-group-radio">
+                            <select name="status" id="status" onchange="toggleOtherStatus()" required>
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                                <option value="widowed">Widowed</option>
+                                <option value="divorced">Legally Separated</option>
+                                <option value="others">Others</option>
+                            </select>
+                            <input type="text" id="otherStatus" name="otherStatus" placeholder="Enter civil status"
+                                style="display: none;" onblur="resetDropdown()" />
+                        </div>
+                    </div>
+                    <div class="form">
+                        <label for="tax">Tax Identification Number</label> <br>
+                        <input type="text" name="tax" id="tax" placeholder="Enter TIN">
+                    </div>
+                    <div class="form">
+                        <label for="nationality">Nationality <span class="text-danger">*</span></label> <br>
+                        <input type="text" name="nationality" id="nationality" placeholder="Enter nationality" required>
+                    </div>
+                    <div class="form">
+                        <label for="religion">Religion</label> <br>
+                        <input type="text" name="religion" id="religion" placeholder="Enter religion">
+                    </div>
+
+                    <div class="form">
+                        <label for="email-address">E-mail Address</label> <br>
+                        <input type="email" name="email-address" id="email-address" placeholder="Enter email">
+                    </div>
+
+                    <div class="form">
+                        <label for="phone-number">Phone Number <span class="text-danger">*</span></label> <br>
+                        <input type="tel" name="phone-number" id="phone-number" placeholder="Enter phone number"
+                            required>
+                    </div>
+                </div>
+            </div>
+            <!-- location details -->
+            <div class=" container">
+                <h1>Location Details</h1>
+                <div class="location-info">
+                    <div class="form">
+                        <label for="region">Region <span class="text-danger">*</span></label> <br>
+                        <select id="region">
+                            <option value="">Select Region</option>
+                        </select>
+                    </div>
+                    <div class="form">
+                        <label for="province">Province <span class="text-danger">*</span></label> <br>
+                        <select id="province" disabled>
+                            <option value="">Select Province</option>
+                        </select>
+                    </div>
+                    <div class="form">
+                        <label for="city">City/Municipality <span class="text-danger">*</span></label> <br>
+                        <select id="city" disabled>
+                            <option value="">Select City/Municipality</option>
+                        </select>
+                    </div>
+                    <div class="form">
+
+                        <label for="barangay">Barangay <span class="text-danger">*</span></label> <br>
+                        <select id="barangay" disabled>
+                            <option value="">Select Barangay</option>
+                        </select>
+                    </div>
+
+                    <div class="form">
+                        <label for="zip">Zip Code <span class="text-danger">*</span></label> <br>
+                        <input type="text" name="zip" id="zip" placeholder="Enter zip code">
+                    </div>
+
+                    <div class="form">
+                        <label for="complete-address">Home Address <span class="text-danger">*</span></label> <br>
+                        <input type="text" name="complete-address" id="complete-address"
+                            placeholder="Street Name, Building, House No.">
+                    </div>
+                </div>
+            </div>
+            <!-- parent informatio details -->
+            <div class="parent-container">
+                <div class="container">
+                    <h1>Father's Name</h1>
+                    <div class="parent-info">
+                        <div class="form">
+                            <label for="flname">Last Name</label> <br>
+                            <input type="text" name="flname" id="flname" placeholder="Enter last name">
+                            <span class="error" id="lastNameError"></span>
+                        </div>
+                        <div class="form">
+                            <label for="ffname">First Name</label> <br>
+                            <input type="text" name="ffname" id="ffname" placeholder="Enter first name">
+                        </div>
+                        <div class="form">
+                            <label for="flname">Middle Initial</label> <br>
+                            <input type="text" name="fmname" id="fmname" placeholder="M.I.">
+                        </div>
+                    </div>
+                </div>
+                <div class="container">
+                    <h1>Mother's Maiden Name</h1>
+                    <div class="parent-info">
+                        <div class="form">
+                            <label for="mlname">Last Name</label> <br>
+                            <input type="text" name="mlname" id="mlname" placeholder="Enter last name">
+                            <span class="error" id="lastNameError"></span>
+                        </div>
+                        <div class="form">
+                            <label for="mfname">First Name</label> <br>
+                            <input type="text" name="mfname" id="mfname" placeholder="Enter first name">
+                        </div>
+                        <div class="form">
+                            <label for="mmname">Middle Initial</label> <br>
+                            <input type="text" name="mmname" id="mmname" placeholder="M.I.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="submit-btn">
+                <button type="submit">Submit</button>
+            </div>
+            </form>
+        </div>
+    </section>
+</body>
+<script src="validation.js"></script>
+<script src="regions.js"></script>
+<script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+</script>
+
+</html>
