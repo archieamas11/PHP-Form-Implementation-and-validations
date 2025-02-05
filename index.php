@@ -1,3 +1,87 @@
+<?php
+    $debug = true;
+    session_start();
+    $errors = [];
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        function validate_name_fields(array $fields) {
+            global $errors;
+            foreach ($fields as $field => $field_name) {
+                $value = trim($_POST[$field] ?? '');
+                if (empty($value)) {
+                    $errors[$field] = "Please enter your $field_name.";
+                } elseif (!preg_match("/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/", $value)) {
+                    $errors[$field] = "$field_name can only contain letters and spaces.";
+                } elseif (strlen($value) < 2 || strlen($value) > 50) {
+                    $errors[$field] = "$field_name must be between 2 and 50 characters.";
+                }
+            }
+        }
+    
+        // Validate multiple name fields at once
+        validate_name_fields([
+            "lname"  => "Last Name",
+            "fname"  => "First Name",
+            "mname"  => "Middle Name",
+            "flname" => "Father's Last Name",
+            "ffname" => "Father's First Name",
+            "fmname" => "Father's Middle Name",
+            "mlname" => "Mother's Last Name",
+            "mfname" => "Mother's First Name",
+            "mmname" => "Mother's Middle Name"
+        ]);
+        
+
+        // Validate Date of Birth (must be at least 18 years old)
+    if (empty($_POST["dob"])) {
+        $errors["dob"] = "Please enter your Date of Birth.";
+    } else {
+        $dob = DateTime::createFromFormat('Y-m-d', $_POST["dob"]);
+        $today = new DateTime();
+        $age = $today->diff($dob)->y;
+        if ($age < 18) {
+            $errors["dob"] = "You must be at least 18 years old.";
+        }
+    }
+
+    // Validate required fields
+    $required_fields = ["pob" => "Place of Birth", "sex" => "Gender", "status" => "Civil Status", "nationality" => "Nationality", "complete-address" => "Home Address", "region" => "Region", "province" => "Province", "city" => "City", "barangay" => "Barangay"];
+    
+    foreach ($required_fields as $field => $label) {
+        if (empty(trim($_POST[$field] ?? ''))) {
+            $errors[$field] = "Please enter/select your $label.";
+        }
+    }
+
+    // Validate Tax Identification Number (TIN) (optional)
+    if (!empty($_POST["tax"]) && !preg_match("/^\d{9,12}$/", $_POST["tax"])) {
+        $errors["tax"] = "TIN must be 9-12 digits.";
+    }
+
+    // Validate Email (optional)
+    if (!empty($_POST["email-address"]) && !filter_var($_POST["email-address"], FILTER_VALIDATE_EMAIL)) {
+        $errors["email-address"] = "Please enter a valid email address.";
+    }
+
+    // Validate Phone Number (optional, PH format 09XXXXXXXXX)
+    if (!empty($_POST["phone-number"]) && !preg_match("/^09[0-9]{9}$/", $_POST["phone-number"])) {
+        $errors["phone-number"] = "Phone number must be a valid PH number (09XXXXXXXXX).";
+    }
+
+    // Validate Zip Code (optional, exactly 4 digits)
+    if (!empty($_POST["zip"]) && !preg_match("/^\d{4}$/", $_POST["zip"])) {
+        $errors["zip"] = "Zip Code must be exactly 4 digits.";
+    }
+
+    // If no errors, store data in session and redirect
+    if (empty($errors)) {
+        $_SESSION["form_data"] = array_map("htmlspecialchars", $_POST);
+        header("Location: result.php");
+        exit();
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,267 +89,274 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHP-Form</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="original.css">
 </head>
+<style>
+    .test-buttons{
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        gap: 10px;
+    }
 
+    .test-buttons .test-btn{
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        flex: 1;
+    }
+
+    .test-buttons .test-btn.filled{
+        background-color: #4CAF50;
+    }
+
+    .test-buttons .test-btn.submits{
+        background-color: #f44336;
+    }
+
+    button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    }
+</style>
 <body>
-    <div class="wrapper">
-        <ul class="StepProgress">
-            <li class="StepProgress-item current" data-step="1"></li>
-            <li class="StepProgress-item" data-step="2"></li>
-            <li class="StepProgress-item" data-step="3"></li>
-        </ul>
-
-        <div class="content-panels">
-            <div class="content content-active">
-                <h1 class="title">Personal Information</h1>
+    <section class="page-1">
+        <!-- personal information details -->
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
+        <div class="center">
+            <div class="title">
+                <h1>Personal Data Form</h1>
+            </div>
+            <?php 
+            if ($debug): ?>
+            <div class="test-buttons">
+                <button class="test-btn filled" type="button" onclick="fillForm()">Fill All Fields</button>
+                <button class="test-btn submits" type="submit">Submit</button>
+            </div>
+            <?php endif; ?>
+            <div class="container">
+                <h1>Personal Information</h1>
                 <div class="personal-info">
-                    <div class="form">
-                        <label for="lname">Last Name <span class="text-danger">*</span></label> <br>
-                        <input type="text" name="lname" id="lname" placeholder="Enter last name" required>
-                        <span class="error" id="lastNameError"></span>
-                    </div>
-                    <div class="form">
-                        <label for="lname">First Name <span class="text-danger">*</span></label> <br>
-                        <input type="text" name="fname" id="fname" placeholder="Enter first name" required>
-                    </div>
-                    <div class="form">
-                        <label for="lname">Middle Initial</label> <br>
-                        <input type="text" name="mname" id="mname" placeholder="M.I.">
-                    </div>
-                    <div class="form">
-                        <label for="dob">Date of Birth <span class="text-danger">*</span></label> <br>
-                        <input type="date" name="dob" id="dob" required>
-                    </div>
-                    <div class="form">
-                        <label for="religion">Place of Birth <span class="text-danger">*</span></label> <br>
-                        <input type="text" name="pob" id="pob" placeholder="Enter place of birth" required>
-                    </div>
-                    <div class="form">
-                        <label>Sex <span class="text-danger">*</span></label> <br>
-                        <div class="radio-group">
-                            <input type="radio" name="sex" id="male" value="male" required>
+                        <div class="form">
+                            <label for="lname">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" name="lname" id="lname" placeholder="Enter last name" value="<?php echo $_POST['lname'] ?? ''; ?>" class="<?php echo isset($errors['lname']) ? 'error' : '' ?>" required>
+                            <span class="error-feedback text-danger"><?php echo $errors['lname'] ?? ''; ?></span>
+                        </div>
+
+                        <div class="form">
+                            <label for="fname">First Name <span class="text-danger">*</span></label> <br>
+                            <input type="text" name="fname" id="fname" placeholder="Enter first name"
+                                value="<?php echo $_POST['fname'] ?? ''; ?>" 
+                                class="<?php echo isset($errors['fname']) ? 'error' : '' ?>" required>
+                            <span class="error-feedback text-danger"><?php echo $errors['fname'] ?? ''; ?></span>
+                        </div>
+
+                        <div class="form">
+                            <label for="mname">Middle Initial</label>
+                            <input type="text"
+                                   name="mname"
+                                   id="mname"
+                                   placeholder="M.I."
+                                   value="<?php echo htmlspecialchars($_POST['mname'] ?? '') ?>"
+                                   class="<?php echo isset($errors['mname']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['mname'] ?? '' ?></span>
+                        </div>
+                        <div class="form">
+                            <label for="dob">Date of Birth <span class="text-danger">*</span></label> <br>
+                            <input type="date"
+                                   name="dob"
+                                   id="dob"
+                                   value="<?php echo htmlspecialchars($_POST['dob'] ?? '') ?>"
+                                   class="<?php echo isset($errors['dob']) ? 'error' : '' ?>">
+                                   <span class="error-feedback text-danger"><?php echo $errors['dob'] ?? '' ?></span>                        
+                        </div>
+                        <div class="form">
+                            <label for="pob">Place of Birth <span class="text-danger">*</span></label> <br>
+                            <input type="text" name="pob" id="pob" placeholder="Enter place of birth" value="<?php echo htmlspecialchars($_POST['pob'] ?? '') ?>" class="<?php echo isset($errors['dob']) ? 'error' : '' ?>" required>
+                            <span class="error-feedback text-danger"><?php echo $errors['pob'] ?? ''; ?></span>
+                        </div>
+
+                        <div class="form">
+                            <label>Sex <span class="text-danger">*</span></label> <br>
+                            <div class="radio-group">
+                            <input type="radio" name="sex" id="male" value="male" <?php if (isset($_POST['sex']) && $_POST['sex'] == 'male') echo 'checked'; ?> required>
                             <label for="male">Male</label>
-                            <input type="radio" name="sex" id="female" value="female">
+                            <input type="radio" name="sex" id="female" value="female" <?php if (isset($_POST['sex']) && $_POST['sex'] == 'female') echo 'checked'; ?>>
                             <label for="female">Female</label>
-                            <input type="radio" name="sex" id="other" value="other">
+                            <input type="radio" name="sex" id="other" value="other" <?php if (isset($_POST['sex']) && $_POST['sex'] == 'other') echo 'checked'; ?>>
                             <label for="other">Other</label>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form">
-                        <label for="status">Civil Status <span class="text-danger">*</span></label> <br>
-                        <div class="form-group-radio">
-                            <select name="status" id="status" onchange="toggleOtherStatus()" required>
-                                <option value="single">Single</option>
-                                <option value="married">Married</option>
-                                <option value="widowed">Widowed</option>
-                                <option value="divorced">Legally Separated</option>
-                                <option value="others">Others</option>
-                            </select>
-                            <input type="text" id="otherStatus" name="otherStatus" placeholder="Enter civil status"
-                                style="display: none;" onblur="resetDropdown()" />
+
+                        <div class="form">
+                            <label for="status">Civil Status <span class="text-danger">*</span></label> <br>
+                            <div class="form-group-radio">
+                                <select name="status" id="status" onchange="toggleOtherStatus()" required>
+                                <option value="single" <?php if (isset($_POST['status']) && $_POST['status'] == 'single') echo 'selected'; ?>>Single</option>
+                                <option value="married" <?php if (isset($_POST['status']) && $_POST['status'] == 'married') echo 'selected'; ?>>Married</option>
+                                <option value="widowed" <?php if (isset($_POST['status']) && $_POST['status'] == 'widowed') echo 'selected'; ?>>Widowed</option>
+                                <option value="divorced" <?php if (isset($_POST['status']) && $_POST['status'] == 'divorced') echo 'selected'; ?>>Legally Separated</option>
+                                <option value="others" <?php if (isset($_POST['status']) && $_POST['status'] == 'others') echo 'selected'; ?>>Others</option>
+                                </select>
+                                <input type="text" id="otherStatus" name="otherStatus" placeholder="Enter civil status"
+                                    style="display: none;" onblur="resetDropdown()" />
+                            </div>
                         </div>
-                    </div>
-                    <div class="form">
-                        <label for="tax">Tax Identification Number</label> <br>
-                        <input type="text" name="tax" id="tax" placeholder="Enter TIN">
-                    </div>
-                    <div class="form">
-                        <label for="nationality">Nationality <span class="text-danger">*</span></label> <br>
-                        <input type="text" name="nationality" id="nationality" placeholder="Enter nationality" required>
-                    </div>
-                    <div class="form">
-                        <label for="religion">Religion</label> <br>
-                        <input type="text" name="religion" id="religion" placeholder="Enter religion">
-                    </div>
 
-                    <div class="form">
-                        <label for="email-address">E-mail Address</label> <br>
-                        <input type="email" name="email-address" id="email-address" placeholder="Enter email">
-                    </div>
+                        <div class="form">
+                            <label for="tax">Tax Identification Number</label> <br>
+                            <input type="text" name="tax" id="tax" placeholder="Enter TIN" value="<?php echo htmlspecialchars($_POST['tax'] ?? '') ?>" class="<?php echo isset($errors['tax']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['tax'] ?? ''; ?></span>
+                        </div>
 
-                    <div class="form">
-                        <label for="phone-number">Phone Number <span class="text-danger">*</span></label> <br>
-                        <input type="tel" name="phone-number" id="phone-number" placeholder="Enter phone number" required>
-                    </div>
+                        <div class="form">
+                            <label for="nationality">Nationality <span class="text-danger">*</span></label> <br>
+                            <input type="text" name="nationality" id="nationality" placeholder="Enter nationality" value="<?php echo htmlspecialchars($_POST['nationality'] ?? '') ?>" required class="<?php echo isset($errors['nationality']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['nationality'] ?? ''; ?></span>
+                        </div>
 
+                        <div class="form">
+                            <label for="religion">Religion</label> <br>
+                            <input type="text" name="religion" id="religion" placeholder="Enter religion" value="<?php echo htmlspecialchars($_POST['religion'] ?? '') ?>" class="<?php echo isset($errors['religion']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['religion'] ?? ''; ?></span>
+                        </div>
+
+                        <div class="form">
+                            <label for="email-address">E-mail Address</label> <br>
+                            <input type="email" name="email-address" id="email-address" placeholder="Enter email" value="<?php echo $_POST['email-address'] ?? ''; ?>" class="<?php echo isset($errors['email-address']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['email-address'] ?? ''; ?></span>
+                        </div>
+
+                        <div class="form">
+                            <label for="phone-number">Phone Number <span class="text-danger">*</span></label> <br>
+                            <input type="tel" name="phone-number" id="phone-number" placeholder="Enter phone number"
+                                required value="<?php echo $_POST['phone-number'] ?? ''; ?>" class="<?php echo isset($errors['phone-number']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['phone-number'] ?? ''; ?></span>
+                        </div>
                 </div>
             </div>
-            <div class="content">
+            <!-- location details -->
+            <div class=" container">
                 <h1>Location Details</h1>
                 <div class="location-info">
                     <div class="form">
                         <label for="region">Region <span class="text-danger">*</span></label> <br>
-                        <select id="region" required>
+                        <select id="region" name="region" class="<?php echo isset($errors['region']) ? 'error' : ''; ?>" required>
                             <option value="">Select Region</option>
                         </select>
+                        <input type="hidden" name="region_name" id="region_name" value="<?php echo $_POST['region_name'] ?? ''; ?>">
+                        <span class="error-feedback text-danger"><?php echo $errors['region'] ?? ''; ?></span>
                     </div>
                     <div class="form">
                         <label for="province">Province <span class="text-danger">*</span></label> <br>
-                        <select id="province" disabled  required>
+                        <select id="province" name="province" class="<?php echo isset($errors['province']) ? 'error' : ''; ?>" disabled required>
                             <option value="">Select Province</option>
                         </select>
-                    </div>
+                        <input type="hidden" name="province_name" id="province_name" value="<?php echo $_POST['province_name'] ?? ''; ?>">
+                        <span class="error-feedback text-danger"><?php echo $errors['province'] ?? ''; ?></span>
+                        </div>
                     <div class="form">
                         <label for="city">City/Municipality <span class="text-danger">*</span></label> <br>
-                        <select id="city" disabled required>
+                        <select id="city" name="city" disabled required class="<?php echo isset($errors['city']) ? 'error' : ''; ?>">
                             <option value="">Select City/Municipality</option>
                         </select>
+                        <input type="hidden" name="city_name" id="city_name" value="<?php echo $_POST['city_name'] ?? ''; ?>">
+                        <span class="error-feedback text-danger"><?php echo $errors['city'] ?? ''; ?></span>
                     </div>
                     <div class="form">
-
                         <label for="barangay">Barangay <span class="text-danger">*</span></label> <br>
-                        <select id="barangay" disabled required>
+                        <select id="barangay" name="barangay" disabled required class="<?php echo isset($errors['barangay']) ? 'error' : ''; ?>">
                             <option value="">Select Barangay</option>
                         </select>
+                        <input type="hidden" name="barangay_name" id="barangay_name" value="<?php echo $_POST['barangay_name'] ?? ''; ?>">
+                        <span class="error-feedback text-danger"><?php echo $errors['barangay'] ?? ''; ?></span>
                     </div>
 
                     <div class="form">
                         <label for="zip">Zip Code <span class="text-danger">*</span></label> <br>
-                        <input type="text" name="zip" id="zip" placeholder="Enter zip code" required>
+                        <input type="text" name="zip" id="zip" placeholder="Enter zip code" value="<?php echo $_POST['zip'] ?? ''; ?>" required class="<?php echo isset($errors['zip']) ? 'error' : '' ?>">
+                        <span class="error-feedback text-danger"><?php echo $errors['zip'] ?? ''; ?></span>
                     </div>
 
                     <div class="form">
                         <label for="complete-address">Home Address <span class="text-danger">*</span></label> <br>
-                        <input type="text" name="complete-address" id="complete-address" placeholder="Street Name, Building, House No." required>
+                        <input type="text" name="complete-address" id="complete-address" placeholder="Street Name, Building, House No." value="<?php echo $_POST['complete-address'] ?? ''; ?>" required class="<?php echo isset($errors['complete-address']) ? 'error' : '' ?>">
+                        <span class="error-feedback text-danger"><?php echo $errors['complete-address'] ?? ''; ?></span>
                     </div>
                 </div>
             </div>
-            <div class="content">
-                <h1>Parent Information</h1>
-                <p>Father's Name</p>
-                <div class="father-info">
-                    <div class="form">
-                        <label for="flname">Last Name</label> <br>
-                        <input type="text" name="flname" id="flname" placeholder="Enter last name">
-                        <span class="error" id="lastNameError"></span>
-                    </div>
-                    <div class="form">
-                        <label for="ffname">First Name</label> <br>
-                        <input type="text" name="ffname" id="ffname" placeholder="Enter first name">
-                    </div>
-                    <div class="form">
-                        <label for="flname">Middle Initial</label> <br>
-                        <input type="text" name="fmname" id="fmname" placeholder="M.I.">
-                    </div>
-                </div>
-                <p>Mother's Maiden Name</p>
-                <div class="mother-info">
-                    <div class="form">
-                        <label for="mlname">Last Name</label> <br>
-                        <input type="text" name="mlname" id="mlname" placeholder="Enter last name">
-                        <span class="error" id="lastNameError"></span>
-                    </div>
-                    <div class="form">
-                        <label for="mfname">First Name</label> <br>
-                        <input type="text" name="mfname" id="mfname" placeholder="Enter first name">
-                    </div>
-                    <div class="form">
-                        <label for="mmname">Middle Initial</label> <br>
-                        <input type="text" name="mmname" id="mmname" placeholder="M.I.">
+            <!-- parent informatio details -->
+            <div class="parent-container">
+                <div class="container">
+                    <h1>Father's Name</h1>
+                    <div class="parent-info">
+                        <div class="form">
+                            <label for="flname">Last Name</label> <br>
+                            <input type="text" name="flname" id="flname" placeholder="Enter last name" value="<?php echo $_POST['flname'] ?? ''; ?>" class="<?php echo isset($errors['flname']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['flname'] ?? ''; ?></span>
+                        </div>
+                        <div class="form">
+                            <label for="ffname">First Name</label> <br>
+                            <input type="text" name="ffname" id="ffname" placeholder="Enter first name" value="<?php echo $_POST['ffname'] ?? ''; ?>" class="<?php echo isset($errors['ffname']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['ffname'] ?? ''; ?></span>
+                        </div>
+                        <div class="form">
+                            <label for="flname">Middle Initial</label> <br>
+                            <input type="text" name="fmname" id="fmname" placeholder="M.I." value="<?php echo $_POST['fmname'] ?? ''; ?>" class="<?php echo isset($errors['fmname']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['fmname'] ?? ''; ?></span>
+                        </div>
                     </div>
                 </div>
+                <div class="container">
+                    <h1>Mother's Maiden Name</h1>
+                    <div class="parent-info">
+                        <div class="form">
+                            <label for="mlname">Last Name</label> <br>
+                            <input type="text" name="mlname" id="mlname" placeholder="Enter last name" value="<?php echo $_POST['mlname'] ?? ''; ?>" class="<?php echo isset($errors['mlname']) ? 'error' : '' ?>"> 
+                            <span class="error-feedback text-danger"><?php echo $errors['mlname'] ?? ''; ?></span>
+                        </div>
+                        <div class="form">
+                            <label for="mfname">First Name</label> <br>
+                            <input type="text" name="mfname" id="mfname" placeholder="Enter first name" value="<?php echo $_POST['mfname'] ?? ''; ?>" class="<?php echo isset($errors['mfname']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['mfname'] ?? ''; ?></span>
+                        </div>
+                        <div class="form">
+                            <label for="mmname">Middle Initial</label> <br>
+                            <input type="text" name="mmname" id="mmname" placeholder="M.I." value="<?php echo $_POST['mmname'] ?? ''; ?>" class="<?php echo isset($errors['mmname']) ? 'error' : '' ?>">
+                            <span class="error-feedback text-danger"><?php echo $errors['mmname'] ?? ''; ?></span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="content">
-                <h1>Step 4</h1>
-                <div>Step 4 content</div>
+            <div class="submit-btn">
+                <button type="submit">Submit</button>
             </div>
-            <div class="content">
-                <h1>Step 5</h1>
-                <div>Step 5 content</div>
-            </div>
+            </form>
         </div>
-
-        <div class="submit-btn">
-            <button class="prev">Previous</button>
-            <button class="next">Next</button>
-        </div>
-    </div>
+    </section>
 </body>
 <script>
-    const steps = document.querySelectorAll('.StepProgress-item');
-    const contents = document.querySelectorAll('.content');
-    const prevBtn = document.querySelector('.prev');
-    const nextBtn = document.querySelector('.next');
-    let currentIndex = 0;
+document.querySelector("form").addEventListener("submit", function () {
+    const regionSelect = document.getElementById("region");
+    const provinceSelect = document.getElementById("province");
+    const citySelect = document.getElementById("city");
+    const barangaySelect = document.getElementById("barangay");
 
-    function updateProgress() {
-        steps.forEach((step, index) => {
-            step.classList.remove('is-done', 'current');
-            if (index < currentIndex) step.classList.add('is-done');
-            if (index === currentIndex) step.classList.add('current');
-        });
-
-        // Update progress line
-        const progressLine = document.querySelector('.StepProgress');
-        const progressPercentage = (currentIndex / (steps.length - 1)) * 100;
-        progressLine.style.setProperty('--progress', `${progressPercentage}%`);
-    }
-
-    function updateContent() {
-        contents.forEach((content, index) => {
-            content.classList.toggle('content-active', index === currentIndex);
-        });
-        checkRequiredFields();
-    }
-
-    nextBtn.addEventListener('click', () => {
-        if (currentIndex < steps.length - 1) {
-            currentIndex++;
-            updateProgress();
-            updateContent();
-        }
-    });
-
-    prevBtn.addEventListener('click', () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-            updateProgress();
-            updateContent();
-        }
-    });
-
-    function checkRequiredFields() {
-        // Get the active content panel
-        const activePanel = document.querySelector('.content-active');
-        // Get all inputs in this panel that have the required attribute
-        const requiredFields = activePanel.querySelectorAll('input[required], select[required]');
-        // Assume all fields are filled
-        let allFilled = true;
-        // Loop over each field
-        requiredFields.forEach(field => {
-            if (!field.value) {
-                allFilled = false;
-            }
-        });
-        // Enable or disable the next button
-        if (allFilled) {
-            nextBtn.disabled = false;
-            nextBtn.style.backgroundColor = '#4a90e2';
-            nextBtn.style.cursor = 'pointer';
-        } else {
-            nextBtn.disabled = true;
-            nextBtn.style.backgroundColor = 'gray';
-            nextBtn.style.cursor = 'not-allowed';
-        }
-    }
-
-    // Add event listeners for input changes on the active panel
-    document.querySelectorAll('input, select').forEach(input => {
-        input.addEventListener('input', checkRequiredFields);
-        input.addEventListener('change', checkRequiredFields);
-    });
-
-    // Call the function on page load to set the initial state
-    checkRequiredFields();
-</script>
-<script src="validation.js"></script>
+    document.getElementById("region_name").value = regionSelect.options[regionSelect.selectedIndex].text;
+    document.getElementById("province_name").value = provinceSelect.options[provinceSelect.selectedIndex].text;
+    document.getElementById("city_name").value = citySelect.options[citySelect.selectedIndex].text;
+    document.getElementById("barangay_name").value = barangaySelect.options[barangaySelect.selectedIndex].text;
+});</script>
 <script src="regions.js"></script>
-<script src="civil-status.js"></script>
 <script>
     if (window.history.replaceState) {
         window.history.replaceState(null, null, window.location.href);
     }
 </script>
+<script src="fill.js"></script>
+
 
 </html>
