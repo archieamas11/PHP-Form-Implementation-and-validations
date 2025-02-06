@@ -1,5 +1,5 @@
 <?php
-    $debug = true;
+    $debug = false;
     session_start();
     $errors = [];
 
@@ -8,8 +8,11 @@
             global $errors;
             foreach ($fields as $field => $field_name) {
                 $value = trim($_POST[$field] ?? '');
+                $is_middle_name = in_array($field, ['mname', 'mmname', 'fmname', 'flname', 'ffname', 'flname', 'mlname', 'mfname']);   
                 if (empty($value)) {
-                    $errors[$field] = "Please enter your $field_name.";
+                    if (!$is_middle_name) {
+                        $errors[$field] = "Please enter your $field_name.";
+                    }
                 } elseif (!preg_match("/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/", $value)) {
                     $errors[$field] = "$field_name can only contain letters and spaces.";
                 } elseif (strlen($value) < 2 || strlen($value) > 50) {
@@ -30,8 +33,26 @@
             "mfname" => "Mother's First Name",
             "mmname" => "Mother's Middle Name"
         ]);
-        
 
+        function no_white_spaces(array $no_space_fields) {
+            global $errors; // Access the global $errors array
+        
+            foreach ($no_space_fields as $field => $field_label) {
+                if (!empty($_POST[$field]) && preg_match("/\s/", $_POST[$field])) {
+                    $errors[$field] = "$field_label should not contain spaces."; // Use field label instead of field name
+                }
+            }
+        }
+        
+        // Call the function with field names as keys and labels as values
+        no_white_spaces([
+            "mname" => "Middle Name",
+            "fmname" => "Father's Middle Name",
+            "mmname" => "Mother's Middle Name",
+            "otherStatus" => "Civil Status"
+        ]);
+         
+       
         // Validate Date of Birth (must be at least 18 years old)
     if (empty($_POST["dob"])) {
         $errors["dob"] = "Please enter your Date of Birth.";
@@ -55,7 +76,7 @@
 
     // Validate Tax Identification Number (TIN) (optional)
     if (!empty($_POST["tax"]) && !preg_match("/^\d{9,12}$/", $_POST["tax"])) {
-        $errors["tax"] = "TIN must be 9-12 digits.";
+        $errors["tax"] = "TIN must be 9-12 digits and numbers only.";
     }
 
     // Validate Email (optional)
@@ -72,6 +93,7 @@
     if (!empty($_POST["zip"]) && !preg_match("/^\d{4}$/", $_POST["zip"])) {
         $errors["zip"] = "Zip Code must be exactly 4 digits.";
     }
+    
 
     // If no errors, store data in session and redirect
     if (empty($errors)) {
@@ -91,37 +113,6 @@
     <title>PHP-Form</title>
     <link rel="stylesheet" href="original.css">
 </head>
-<style>
-    .test-buttons{
-        display: flex;
-        justify-content: space-between;
-        margin: 10px 0;
-        gap: 10px;
-    }
-
-    .test-buttons .test-btn{
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-        flex: 1;
-    }
-
-    .test-buttons .test-btn.filled{
-        background-color: #4CAF50;
-    }
-
-    .test-buttons .test-btn.submits{
-        background-color: #f44336;
-    }
-
-    button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-    }
-</style>
 <body>
     <section class="page-1">
         <!-- personal information details -->
@@ -134,7 +125,6 @@
             if ($debug): ?>
             <div class="test-buttons">
                 <button class="test-btn filled" type="button" onclick="fillForm()">Fill All Fields</button>
-                <button class="test-btn submits" type="submit">Submit</button>
             </div>
             <?php endif; ?>
             <div class="container">
@@ -190,7 +180,6 @@
                             <label for="other">Other</label>
                             </div>
                         </div>
-
                         <div class="form">
                             <label for="status">Civil Status <span class="text-danger">*</span></label> <br>
                             <div class="form-group-radio">
@@ -201,8 +190,9 @@
                                 <option value="divorced" <?php if (isset($_POST['status']) && $_POST['status'] == 'divorced') echo 'selected'; ?>>Legally Separated</option>
                                 <option value="others" <?php if (isset($_POST['status']) && $_POST['status'] == 'others') echo 'selected'; ?>>Others</option>
                                 </select>
-                                <input type="text" id="otherStatus" name="otherStatus" placeholder="Enter civil status"
+                                <input type="text" id="otherStatus" name="otherStatus" placeholder="Enter civil status" class="<?php echo isset($errors['otherStatus']) ? 'error' : '' ?>" value="<?php echo isset($_POST['otherStatus']) ? htmlspecialchars($_POST['otherStatus']) : ''; ?>"
                                     style="display: none;" onblur="resetDropdown()" />
+                                    <span class="error-feedback text-danger"><?php echo $errors['otherStatus'] ?? ''; ?></span>
                             </div>
                         </div>
 
@@ -338,6 +328,39 @@
         </div>
     </section>
 </body>
+<script src="fill.js"></script>
+<script>
+    function toggleOtherStatus() {
+    let statusDropdown = document.getElementById("status");
+    let otherStatusInput = document.getElementById("otherStatus");
+
+    if (statusDropdown.value === "others") {
+        statusDropdown.style.display = "none";
+        otherStatusInput.style.display = "inline-block";
+        otherStatusInput.focus();
+    }
+}
+
+function resetDropdown() {
+    let statusDropdown = document.getElementById("status");
+    let otherStatusInput = document.getElementById("otherStatus");
+
+    if (otherStatusInput.value.trim() === "") {
+        otherStatusInput.style.display = "none";
+        statusDropdown.style.display = "inline-block";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    let statusDropdown = document.getElementById("status");
+    let otherStatusInput = document.getElementById("otherStatus");
+
+    if (statusDropdown.value === "others") {
+        statusDropdown.style.display = "none";
+        otherStatusInput.style.display = "inline-block";
+    }
+});
+</script>
 <script>
 document.querySelector("form").addEventListener("submit", function () {
     const regionSelect = document.getElementById("region");
@@ -356,7 +379,6 @@ document.querySelector("form").addEventListener("submit", function () {
         window.history.replaceState(null, null, window.location.href);
     }
 </script>
-<script src="fill.js"></script>
 
 
 </html>

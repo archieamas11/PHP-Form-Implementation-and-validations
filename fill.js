@@ -13,7 +13,7 @@ function fillForm() {
         city: "0702232000",
         barangay: "0702232013",
         nationality: "filipino",
-        religion: "Oten",
+        religion: "roman catholic",
         "email-address": "archiealbarico@gmail.com",
         "phone-number": "09123456789",
         zip: "6046",
@@ -26,7 +26,6 @@ function fillForm() {
         mmname: "amas"
     };
 
-    // Fill normal inputs
     for (const key in formData) {
         if (formData.hasOwnProperty(key)) {
             const inputField = document.querySelector(`[name=${key}]`);
@@ -40,28 +39,24 @@ function fillForm() {
         }
     }
 
-    // Select Region and Trigger Change Event
     const regionSelect = document.getElementById("region");
     regionSelect.value = formData.region;
     regionSelect.dispatchEvent(new Event("change"));
 
-    // Wait for Province Dropdown to Populate
     setTimeout(() => {
         const provinceSelect = document.getElementById("province");
         provinceSelect.value = formData.province;
         provinceSelect.dispatchEvent(new Event("change"));
 
-        // Wait for City Dropdown to Populate
         setTimeout(() => {
             const citySelect = document.getElementById("city");
             citySelect.value = formData.city;
             citySelect.dispatchEvent(new Event("change"));
 
-            // Wait for Barangay Dropdown to Populate
             setTimeout(() => {
                 const barangaySelect = document.getElementById("barangay");
                 barangaySelect.value = formData.barangay;
-            }, 500); // Ensure barangay is populated before setting value
+            }, 500);
         }, 500);
     }, 500);
 }

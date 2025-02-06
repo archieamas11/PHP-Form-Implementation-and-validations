@@ -272,3 +272,24 @@ button:hover {
 button:active {
     transform: translateY(0);
 }
+
+.test-buttons{
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    gap: 10px;
+}
+
+.test-buttons .test-btn{
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    flex: 1;
+}
+
+.test-buttons .test-btn.filled{
+    background-color: #d1d1d1;
+}
