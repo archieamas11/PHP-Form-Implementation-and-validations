@@ -128,7 +128,7 @@
             </div>
             <?php endif; ?>
             <div class="container">
-                <h1>Personal Information</h1>
+                <h1>Personal Data</h1>
                 <div class="personal-info">
                         <div class="form">
                             <label for="lname">Last Name <span class="text-danger">*</span></label>
@@ -230,7 +230,7 @@
             </div>
             <!-- location details -->
             <div class=" container">
-                <h1>Location Details</h1>
+                <h1>Home Address</h1>
                 <div class="location-info">
                     <div class="form">
                         <label for="region">Region <span class="text-danger">*</span></label> <br>
