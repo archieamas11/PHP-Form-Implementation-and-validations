@@ -37,8 +37,10 @@ $age = $dob->diff($today)->y;
             <p><strong>Date of Birth:</strong> <?php echo ucwords(htmlspecialchars($form_data["dob"])); ?></p>
             <p><strong>Place of Birth:</strong> <?php echo ucwords(htmlspecialchars($form_data["pob"])); ?></p>
             <p><strong>Religion:</strong> <?php echo ucwords(htmlspecialchars($form_data["religion"] ?? "N/A")); ?></p>
+            <p><strong>Nationality:</strong> <?php echo ucwords(htmlspecialchars($form_data["nationality"])); ?></p>
             <p><strong>Gender:</strong> <?php echo ucwords(htmlspecialchars($form_data["sex"])); ?></p>
             <p><strong>Civil Status:</strong> <?php echo ucwords(htmlspecialchars($form_data["status"])); ?></p>
+            <p><strong>Taxi Identification Number:</strong> <?php echo ucwords(htmlspecialchars($form_data["tax"])); ?></p>
         </div>
 
         <div class="data-group">
