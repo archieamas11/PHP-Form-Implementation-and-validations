@@ -38,6 +38,7 @@ $age = $dob->diff($today)->y;
             <p><strong>Place of Birth:</strong> <?php echo ucwords(htmlspecialchars($form_data["pob"])); ?></p>
             <p><strong>Religion:</strong> <?php echo ucwords(htmlspecialchars($form_data["religion"] ?? "N/A")); ?></p>
             <p><strong>Gender:</strong> <?php echo ucwords(htmlspecialchars($form_data["sex"])); ?></p>
+            <p><strong>Civil Status:</strong> <?php echo ucwords(htmlspecialchars($form_data["status"])); ?></p>
         </div>
 
         <div class="data-group">
@@ -53,6 +54,7 @@ $age = $dob->diff($today)->y;
             <!-- Contact & Family -->
             <p><strong>Email:</strong> <?php echo htmlspecialchars($form_data["email-address"] ?? 'N/A'); ?></p>
             <p><strong>Phone Number:</strong> <?php echo htmlspecialchars($form_data["phone-number"] ?? 'N/A'); ?></p>
+            <p><strong>Telephone Number:</strong> <?php echo htmlspecialchars($form_data["tel"] ?? 'N/A'); ?></p>
             <p><strong>Father's Name:</strong> <?php echo ucwords(htmlspecialchars($form_data["flname"] ?? 'N/A')); ?>, <?php echo ucwords(htmlspecialchars($form_data["ffname"] ?? 'N/A')); ?> <?php echo ucwords(htmlspecialchars($form_data["fmname"] ?? 'N/A')); ?></p>
             <p><strong>Mother's Name:</strong> <?php echo ucwords(htmlspecialchars($form_data["mlname"] ?? 'N/A')); ?>, <?php echo ucwords(htmlspecialchars($form_data["mfname"] ?? 'N/A')); ?> <?php echo ucwords(htmlspecialchars($form_data["mmname"] ?? 'N/A')); ?></p>
         </div>

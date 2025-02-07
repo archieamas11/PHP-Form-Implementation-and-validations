@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const selectedCity = document.getElementById("city_name").value;
     const selectedBarangay = document.getElementById("barangay_name").value;
 
+
     const cache = { regions: {}, provinces: {}, cities: {}, barangays: {} };
 
     // Helper function to populate select options
@@ -97,4 +98,16 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
     }
+});
+
+document.querySelector("form").addEventListener("submit", function () {
+    const regionSelect = document.getElementById("region");
+    const provinceSelect = document.getElementById("province");
+    const citySelect = document.getElementById("city");
+    const barangaySelect = document.getElementById("barangay");
+
+    document.getElementById("region_name").value = regionSelect.options[regionSelect.selectedIndex].text;
+    document.getElementById("province_name").value = provinceSelect.options[provinceSelect.selectedIndex].text;
+    document.getElementById("city_name").value = citySelect.options[citySelect.selectedIndex].text;
+    document.getElementById("barangay_name").value = barangaySelect.options[barangaySelect.selectedIndex].text;
 });
