@@ -8,14 +8,14 @@
             global $errors;
             foreach ($fields as $field => $field_name) {
                 $value = trim($_POST[$field] ?? '');
-                $is_middle_name = in_array($field, ['mname', 'mmname', 'fmname', 'flname', 'ffname', 'flname', 'mlname', 'mfname']);   
+                $is_middle_name = in_array($field, ['mname', 'mmname', 'fmname']);   
                 if (empty($value)) {
                     if (!$is_middle_name) {
                         $errors[$field] = "Please enter your $field_name.";
                     }
                 } elseif (!preg_match("/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/", $value)) {
                     $errors[$field] = "$field_name can only contain letters and spaces.";
-                } elseif (strlen($value) < 2 || strlen($value) > 50) {
+                } elseif (!$is_middle_name && (strlen($value) < 2 || strlen($value) > 50)) {
                     $errors[$field] = "$field_name must be between 2 and 50 characters.";
                 }
             }
@@ -38,18 +38,35 @@
             global $errors; // Access the global $errors array
         
             foreach ($no_space_fields as $field => $field_label) {
-                if (!empty($_POST[$field]) && preg_match("/\s/", $_POST[$field])) {
-                    $errors[$field] = "$field_label should not contain spaces."; // Use field label instead of field name
+                if (!empty($_POST[$field]) && preg_match("/\s{2,}/", $_POST[$field])) {
+                    $errors[$field] = "$field_label should not contain 2 or more consecutive spaces."; // Use field label instead of field name
                 }
             }
         }
         
         // Call the function with field names as keys and labels as values
         no_white_spaces([
+            "lname" => "Last Name",
+            "fname" => "First Name",
             "mname" => "Middle Name",
+            "flname" => "Father's Last Name",
+            "ffname" => "Father's First Name",
             "fmname" => "Father's Middle Name",
+            "mlname" => "Mother's Last Name",
+            "mfname" => "Mother's First Name",
             "mmname" => "Mother's Middle Name",
-            "otherStatus" => "Civil Status"
+            "otherStatus" => "Civil Status",
+            "pob" => "Place of Birth",
+            "nationality" => "Nationality",
+            "complete-address" => "Home Address",
+            "region" => "Region",
+            "province" => "Province",
+            "city" => "City",
+            "barangay" => "Barangay",
+            "zip" => "Zip Code",
+            "email-address" => "Email Address",
+            "phone-number" => "Phone Number",
+            "tel" => "Telephone Number"
         ]);
          
        

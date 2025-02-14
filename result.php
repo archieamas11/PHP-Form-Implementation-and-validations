@@ -29,7 +29,6 @@ $age = $dob->diff($today)->y;
     <a href="index.php" class="button">Go Back</a>
 
     </div>
-        
         <div class="data-group">
             <!-- Personal Information -->
             <p><strong>Name:</strong> <?php echo ucwords(htmlspecialchars($form_data["lname"])); ?>, <?php echo ucwords(htmlspecialchars($form_data["fname"])); ?> <?php echo ucwords(htmlspecialchars($form_data["mname"])); ?></p>
@@ -49,6 +48,7 @@ $age = $dob->diff($today)->y;
             <p><strong>Province:</strong> <?php echo ucwords(htmlspecialchars($form_data["province_name"] ?? "N/A")); ?></p>
             <p><strong>City:</strong> <?php echo ucwords(htmlspecialchars($form_data["city_name"] ?? "N/A")); ?></p>
             <p><strong>Barangay:</strong> <?php echo ucwords(htmlspecialchars($form_data["barangay_name"] ?? "N/A")); ?></p>
+            <p><strong>Zip Code:</strong> <?php echo ucwords(htmlspecialchars($form_data["zip"] ?? "N/A")); ?></p>
             <p><strong>Home Address:</strong> <?php echo ucwords(htmlspecialchars($form_data["complete-address"])); ?></p>
         </div>
 
