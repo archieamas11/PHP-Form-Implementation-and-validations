@@ -1,76 +1,80 @@
 <?php
-    $debug = true;
-    session_start();
-    $errors = [];
+include_once "include/database.php";
+$debug = true;
+session_start();
+$errors = [];
+$form_data = $_SESSION["form_data"] ?? [];
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        function validate_name_fields(array $fields) {
-            global $errors;
-            foreach ($fields as $field => $field_name) {
-                $value = trim($_POST[$field] ?? '');
-                $is_middle_name = in_array($field, ['mname', 'mmname', 'fmname']);   
-                if (empty($value)) {
-                    if (!$is_middle_name) {
-                        $errors[$field] = "Please enter your $field_name.";
-                    }
-                } elseif (!preg_match("/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/", $value)) {
-                    $errors[$field] = "$field_name can only contain letters and spaces.";
-                } elseif (!$is_middle_name && (strlen($value) < 2 || strlen($value) > 50)) {
-                    $errors[$field] = "$field_name must be between 2 and 50 characters.";
+
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    function validate_name_fields(array $fields) {
+        global $errors;
+        foreach ($fields as $field => $field_name) {
+            $value = trim($_POST[$field] ?? '');
+            $is_middle_name = in_array($field, ['mname', 'mmname', 'fmname']);   
+            if (empty($value)) {
+                if (!$is_middle_name) {
+                    $errors[$field] = "Please enter your $field_name.";
                 }
+            } elseif (!preg_match("/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/", $value)) {
+                $errors[$field] = "$field_name can only contain letters and spaces.";
+            } elseif (!$is_middle_name && (strlen($value) < 2 || strlen($value) > 50)) {
+                $errors[$field] = "$field_name must be between 2 and 50 characters.";
             }
         }
+    }
+
+    // Validate multiple name fields at once
+    validate_name_fields([
+        "lname"  => "last name",
+        "fname"  => "first name",
+        "mname"  => "middle name",
+        "flname" => "father's last name",
+        "ffname" => "father's first name",
+        "fmname" => "father's middle name",
+        "mlname" => "mother's last name",
+        "mfname" => "mother's first name",
+        "mmname" => "mother's middle name"
+    ]);
+
+    function no_white_spaces(array $no_space_fields) {
+        global $errors; // Access the global $errors array
     
-        // Validate multiple name fields at once
-        validate_name_fields([
-            "lname"  => "last name",
-            "fname"  => "first name",
-            "mname"  => "middle name",
-            "flname" => "father's last name",
-            "ffname" => "father's first name",
-            "fmname" => "father's middle name",
-            "mlname" => "mother's last name",
-            "mfname" => "mother's first name",
-            "mmname" => "mother's middle name"
-        ]);
-
-        function no_white_spaces(array $no_space_fields) {
-            global $errors; // Access the global $errors array
-        
-            foreach ($no_space_fields as $field => $field_label) {
-                if (!empty($_POST[$field]) && preg_match("/\s{2,}/", $_POST[$field])) {
-                    $errors[$field] = "$field_label should not contain 2 or more consecutive spaces."; // Use field label instead of field name
-                }
+        foreach ($no_space_fields as $field => $field_label) {
+            if (!empty($_POST[$field]) && preg_match("/\s{2,}/", $_POST[$field])) {
+                $errors[$field] = "$field_label should not contain 2 or more consecutive spaces."; // Use field label instead of field name
             }
         }
-        
-        // Call the function with field names as keys and labels as values
-        no_white_spaces([
-            "lname" => "Last Name",
-            "fname" => "First Name",
-            "mname" => "Middle Name",
-            "flname" => "Father's Last Name",
-            "ffname" => "Father's First Name",
-            "fmname" => "Father's Middle Name",
-            "mlname" => "Mother's Last Name",
-            "mfname" => "Mother's First Name",
-            "mmname" => "Mother's Middle Name",
-            "otherStatus" => "Civil Status",
-            "pob" => "Place of Birth",
-            "nationality" => "Nationality",
-            "complete-address" => "Home Address",
-            "region" => "Region",
-            "province" => "Province",
-            "city" => "City",
-            "barangay" => "Barangay",
-            "zip" => "Zip Code",
-            "email-address" => "Email Address",
-            "phone-number" => "Phone Number",
-            "tel" => "Telephone Number"
-        ]);
-         
-       
-        // Validate Date of Birth (must be at least 18 years old)
+    }
+    
+    // Call the function with field names as keys and labels as values
+    no_white_spaces([
+        "lname" => "Last Name",
+        "fname" => "First Name",
+        "mname" => "Middle Name",
+        "flname" => "Father's Last Name",
+        "ffname" => "Father's First Name",
+        "fmname" => "Father's Middle Name",
+        "mlname" => "Mother's Last Name",
+        "mfname" => "Mother's First Name",
+        "mmname" => "Mother's Middle Name",
+        "otherStatus" => "Civil Status",
+        "pob" => "Place of Birth",
+        "nationality" => "Nationality",
+        "complete-address" => "Home Address",
+        "region" => "Region",
+        "province" => "Province",
+        "city" => "City",
+        "barangay" => "Barangay",
+        "zip" => "Zip Code",
+        "email-address" => "Email Address",
+        "phone-number" => "Phone Number",
+        "tel" => "Telephone Number"
+    ]);
+     
+   
+    // Validate Date of Birth (must be at least 18 years old)
     if (empty($_POST["dob"])) {
         $errors["dob"] = "Please enter your Date of Birth.";
     } else {
@@ -119,13 +123,52 @@
     }
     
 
-    // If no errors, store data in session and redirect
+    // If no errors, store data in database
     if (empty($errors)) {
-        $_SESSION["form_data"] = array_map("htmlspecialchars", $_POST);
-        header("Location: result.php");
-        exit();
+        try {
+            // Set parameters first
+            $user_full_name = trim($_POST['fname'] . ' ' . $_POST['mname'] . ' ' . $_POST['lname']);
+            $date_of_birth = $_POST['dob'];
+            $sex = $_POST['sex'];
+            $civil_status = $_POST['status'];
+            $tax_identification_number = $_POST['tax'] ?? null;
+            $nationality = $_POST['nationality'];
+            $religion = $_POST['religion'] ?? null;
+            $place_of_birth = $_POST['pob'];
+            $phone_number = $_POST['phone-number'];
+            $email_address = $_POST['email-address'] ?? null;
+            $telephone_number = $_POST['tel'] ?? null;
+            $region = $_POST['region_name'];
+            $province = $_POST['province_name'];
+            $municipality = $_POST['city_name'];
+            $barangay = $_POST['barangay_name'];
+            $zip_code = $_POST['zip'];
+            $fathers_full_name = trim($_POST['ffname'] . ' ' . $_POST['fmname'] . ' ' . $_POST['flname']);
+            $mothers_full_name = trim($_POST['mfname'] . ' ' . $_POST['mmname'] . ' ' . $_POST['mlname']);
+
+            // Prepare and bind
+            $stmt = $conn->prepare("INSERT INTO tbl_users (user_full_name, date_of_birth, sex, civil_status, tax_identification_number, nationality, religion, place_of_birth, phone_number, email_address, telephone_number, region, province, municipality, barangay, zip_code, fathers_full_name, mothers_full_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            
+            if ($stmt === false) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+
+            $stmt->bind_param("ssssssssssssssssss", $user_full_name, $date_of_birth, $sex, $civil_status, $tax_identification_number, $nationality, $religion, $place_of_birth, $phone_number, $email_address, $telephone_number, $region, $province, $municipality, $barangay, $zip_code, $fathers_full_name, $mothers_full_name);
+
+            if (!$stmt->execute()) {
+                throw new Exception("Execute failed: " . $stmt->error);
+            }
+
+            $stmt->close();
+            header("Location: success.php");
+            exit();
+
+        } catch (Exception $e) {
+            $errors['database'] = "Database Error: " . $e->getMessage();
+        }
     }
 }
+$conn->close();
 ?>
 
 <!DOCTYPE html>
