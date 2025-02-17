@@ -1,174 +1,162 @@
 <?php
-include_once "include/database.php";
-$debug = true;
-session_start();
-$errors = [];
-$form_data = $_SESSION["form_data"] ?? [];
+    include_once "include/database.php";
+    $debug = true;
+    session_start();
+    $errors    = [];
+    $form_data = $_SESSION["form_data"] ?? [];
 
-
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    function validate_name_fields(array $fields) {
-        global $errors;
-        foreach ($fields as $field => $field_name) {
-            $value = trim($_POST[$field] ?? '');
-            $is_middle_name = in_array($field, ['mname', 'mmname', 'fmname']);   
-            if (empty($value)) {
-                if (!$is_middle_name) {
-                    $errors[$field] = "Please enter your $field_name.";
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        function validate_name_fields(array $fields)
+        {
+            global $errors;
+            foreach ($fields as $field => $field_name) {
+                $value          = trim($_POST[$field] ?? '');
+                $is_middle_name = in_array($field, ['mname', 'mmname', 'fmname']);
+                if (empty($value)) {
+                    if (! $is_middle_name) {
+                        $errors[$field] = "Please enter your $field_name.";
+                    }
+                } elseif (! preg_match("/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/", $value)) {
+                    $errors[$field] = "$field_name can only contain letters and spaces.";
+                } elseif (! $is_middle_name && (strlen($value) < 2 || strlen($value) > 50)) {
+                    $errors[$field] = "$field_name must be between 2 and 50 characters.";
                 }
-            } elseif (!preg_match("/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/", $value)) {
-                $errors[$field] = "$field_name can only contain letters and spaces.";
-            } elseif (!$is_middle_name && (strlen($value) < 2 || strlen($value) > 50)) {
-                $errors[$field] = "$field_name must be between 2 and 50 characters.";
             }
         }
-    }
 
-    // Validate multiple name fields at once
-    validate_name_fields([
-        "lname"  => "last name",
-        "fname"  => "first name",
-        "mname"  => "middle name",
-        "flname" => "father's last name",
-        "ffname" => "father's first name",
-        "fmname" => "father's middle name",
-        "mlname" => "mother's last name",
-        "mfname" => "mother's first name",
-        "mmname" => "mother's middle name"
-    ]);
+        // Validate multiple name fields at once
+        validate_name_fields([
+            "lname"  => "last name",
+            "fname"  => "first name",
+            "mname"  => "middle name",
+            "flname" => "father's last name",
+            "ffname" => "father's first name",
+            "fmname" => "father's middle name",
+            "mlname" => "mother's last name",
+            "mfname" => "mother's first name",
+            "mmname" => "mother's middle name",
+        ]);
 
-    function no_white_spaces(array $no_space_fields) {
-        global $errors; // Access the global $errors array
-    
-        foreach ($no_space_fields as $field => $field_label) {
-            if (!empty($_POST[$field]) && preg_match("/\s{2,}/", $_POST[$field])) {
-                $errors[$field] = "$field_label should not contain 2 or more consecutive spaces."; // Use field label instead of field name
+        function no_white_spaces(array $no_space_fields)
+        {
+            global $errors; // Access the global $errors array
+
+            foreach ($no_space_fields as $field => $field_label) {
+                if (! empty($_POST[$field]) && preg_match("/\s{2,}/", $_POST[$field])) {
+                    $errors[$field] = "$field_label should not contain 2 or more consecutive spaces."; // Use field label instead of field name
+                }
             }
         }
-    }
-    
-    // Call the function with field names as keys and labels as values
-    no_white_spaces([
-        "lname" => "Last Name",
-        "fname" => "First Name",
-        "mname" => "Middle Name",
-        "flname" => "Father's Last Name",
-        "ffname" => "Father's First Name",
-        "fmname" => "Father's Middle Name",
-        "mlname" => "Mother's Last Name",
-        "mfname" => "Mother's First Name",
-        "mmname" => "Mother's Middle Name",
-        "otherStatus" => "Civil Status",
-        "pob" => "Place of Birth",
-        "nationality" => "Nationality",
-        "complete-address" => "Home Address",
-        "region" => "Region",
-        "province" => "Province",
-        "city" => "City",
-        "barangay" => "Barangay",
-        "zip" => "Zip Code",
-        "email-address" => "Email Address",
-        "phone-number" => "Phone Number",
-        "tel" => "Telephone Number"
-    ]);
-     
-   
-    // Validate Date of Birth (must be at least 18 years old)
-    if (empty($_POST["dob"])) {
-        $errors["dob"] = "Please enter your Date of Birth.";
-    } else {
-        $dob = DateTime::createFromFormat('Y-m-d', $_POST["dob"]);
-        $today = new DateTime();
-        $age = $today->diff($dob)->y;
-        if ($age < 18) {
-            $errors["dob"] = "You must be at least 18 years old.";
+
+        // Call the function with field names as keys and labels as values
+        no_white_spaces([
+            "lname"            => "Last Name",
+            "fname"            => "First Name",
+            "mname"            => "Middle Name",
+            "flname"           => "Father's Last Name",
+            "ffname"           => "Father's First Name",
+            "fmname"           => "Father's Middle Name",
+            "mlname"           => "Mother's Last Name",
+            "mfname"           => "Mother's First Name",
+            "mmname"           => "Mother's Middle Name",
+            "otherStatus"      => "Civil Status",
+            "pob"              => "Place of Birth",
+            "nationality"      => "Nationality",
+            "complete-address" => "Home Address",
+            "region"           => "Region",
+            "province"         => "Province",
+            "city"             => "City",
+            "barangay"         => "Barangay",
+            "zip"              => "Zip Code",
+            "email-address"    => "Email Address",
+            "phone-number"     => "Phone Number",
+            "tel"              => "Telephone Number",
+        ]);
+
+        // Validate Date of Birth (must be at least 18 years old)
+        if (empty($_POST["dob"])) {
+            $errors["dob"] = "Please enter your Date of Birth.";
+        } else {
+            $dob   = DateTime::createFromFormat('Y-m-d', $_POST["dob"]);
+            $today = new DateTime();
+            $age   = $today->diff($dob)->y;
+            if ($age < 18) {
+                $errors["dob"] = "You must be at least 18 years old.";
+            }
         }
-    }
 
-    // Validate required fields
-    $required_fields = ["pob" => "Place of Birth", "sex" => "Gender", "status" => "Civil Status", "nationality" => "Nationality", "complete-address" => "Home Address", "region" => "Region", "province" => "Province", "city" => "City", "barangay" => "Barangay", "zip" => "Zip Code"];
-    
-    foreach ($required_fields as $field => $label) {
-        if (empty(trim($_POST[$field] ?? ''))) {
-            $errors[$field] = "Please enter/select your $label.";
+        // Validate required fields
+        $required_fields = ["pob" => "Place of Birth", "sex" => "Gender", "status" => "Civil Status", "nationality" => "Nationality", "complete-address" => "Home Address", "region" => "Region", "province" => "Province", "city" => "City", "barangay" => "Barangay", "zip" => "Zip Code"];
+
+        foreach ($required_fields as $field => $label) {
+            if (empty(trim($_POST[$field] ?? ''))) {
+                $errors[$field] = "Please enter/select your $label.";
+            }
         }
-    }
 
-    // Validate Tax Identification Number (TIN) (optional)
-    if (!empty($_POST["tax"]) && !preg_match("/^\d{9,12}$/", $_POST["tax"])) {
-        $errors["tax"] = "TIN must be 9-12 digits only.";
-    }
+        // Validate Tax Identification Number (TIN) (optional)
+        if (! empty($_POST["tax"]) && ! preg_match("/^\d{9,12}$/", $_POST["tax"])) {
+            $errors["tax"] = "TIN must be 9-12 digits only.";
+        }
 
-    // Validate Email (optional)
-    if (!empty($_POST["email-address"]) && !filter_var($_POST["email-address"], FILTER_VALIDATE_EMAIL)) {
-        $errors["email-address"] = "Please enter a valid email address.";
-    }
+        // Validate Email (optional)
+        if (! empty($_POST["email-address"]) && ! filter_var($_POST["email-address"], FILTER_VALIDATE_EMAIL)) {
+            $errors["email-address"] = "Please enter a valid email address.";
+        }
 
-    // Validate Phone Number (optional, PH format 09XXXXXXXXX)
-    if (!empty($_POST["phone-number"]) && !preg_match("/^09[0-9]{9}$/", $_POST["phone-number"])) {
-        $errors["phone-number"] = "Phone number must be a valid PH number (09XXXXXXXXX).";
-    } else if (empty($_POST["phone-number"])) {
-        $errors["phone-number"] = "Please enter your Phone Number.";
-    }
+        // Validate Phone Number (optional, PH format 09XXXXXXXXX)
+        if (! empty($_POST["phone-number"]) && ! preg_match("/^09[0-9]{9}$/", $_POST["phone-number"])) {
+            $errors["phone-number"] = "Phone number must be a valid PH number (09XXXXXXXXX).";
+        } else if (empty($_POST["phone-number"])) {
+            $errors["phone-number"] = "Please enter your Phone Number.";
+        }
 
-    if (!empty($_POST["tel"]) && !preg_match("/^(0[2-9]\d{1,2}-?\d{6,7})$/", $_POST["tel"])) {
-        $errors["tel"] = "Telephone number must be a valid PH landline.";
-    }
-    
+        if (! empty($_POST["tel"]) && ! preg_match("/^(0[2-9]\d{1,2}-?\d{6,7})$/", $_POST["tel"])) {
+            $errors["tel"] = "Telephone number must be a valid PH landline.";
+        }
 
-    // Validate Zip Code (optional, exactly 4 digits)
-    if (!empty($_POST["zip"]) && !preg_match("/^\d{4}$/", $_POST["zip"])) {
-        $errors["zip"] = "Zip Code must be exactly 4 digits.";
-    }
-    
+        // Validate Zip Code (optional, exactly 4 digits)
+        if (! empty($_POST["zip"]) && ! preg_match("/^\d{4}$/", $_POST["zip"])) {
+            $errors["zip"] = "Zip Code must be exactly 4 digits.";
+        }
 
-    // If no errors, store data in database
-    if (empty($errors)) {
-        try {
-            // Set parameters first
-            $user_full_name = trim($_POST['fname'] . ' ' . $_POST['mname'] . ' ' . $_POST['lname']);
-            $date_of_birth = $_POST['dob'];
-            $sex = $_POST['sex'];
-            $civil_status = $_POST['status'];
-            $tax_identification_number = $_POST['tax'] ?? null;
-            $nationality = $_POST['nationality'];
-            $religion = $_POST['religion'] ?? null;
-            $place_of_birth = $_POST['pob'];
-            $phone_number = $_POST['phone-number'];
-            $email_address = $_POST['email-address'] ?? null;
-            $telephone_number = $_POST['tel'] ?? null;
-            $region = $_POST['region_name'];
-            $province = $_POST['province_name'];
-            $municipality = $_POST['city_name'];
-            $barangay = $_POST['barangay_name'];
-            $zip_code = $_POST['zip'];
-            $fathers_full_name = trim($_POST['ffname'] . ' ' . $_POST['fmname'] . ' ' . $_POST['flname']);
-            $mothers_full_name = trim($_POST['mfname'] . ' ' . $_POST['mmname'] . ' ' . $_POST['mlname']);
-
+        // If no errors, store data in database
+        if (empty($errors)) {
             // Prepare and bind
             $stmt = $conn->prepare("INSERT INTO tbl_users (user_full_name, date_of_birth, sex, civil_status, tax_identification_number, nationality, religion, place_of_birth, phone_number, email_address, telephone_number, region, province, municipality, barangay, zip_code, fathers_full_name, mothers_full_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            
-            if ($stmt === false) {
-                throw new Exception("Prepare failed: " . $conn->error);
-            }
-
             $stmt->bind_param("ssssssssssssssssss", $user_full_name, $date_of_birth, $sex, $civil_status, $tax_identification_number, $nationality, $religion, $place_of_birth, $phone_number, $email_address, $telephone_number, $region, $province, $municipality, $barangay, $zip_code, $fathers_full_name, $mothers_full_name);
+            // Set parameters and execute
+            $user_full_name            = $_POST['fname'] . ' ' . $_POST['mname'] . ' ' . $_POST['lname'];
+            $date_of_birth             = $_POST['dob'];
+            $sex                       = $_POST['sex'];
+            $civil_status              = $_POST['status'];
+            $tax_identification_number = $_POST['tax'];
+            $nationality               = $_POST['nationality'];
+            $religion                  = $_POST['religion'];
+            $place_of_birth            = $_POST['pob'];
+            $phone_number              = $_POST['phone-number'];
+            $email_address             = $_POST['email-address'];
+            $telephone_number          = $_POST['tel'];
+            $region                    = $_POST['region_name'];
+            $province                  = $_POST['province_name'];
+            $municipality              = $_POST['city_name'];
+            $barangay                  = $_POST['barangay_name'];
+            $zip_code                  = $_POST['zip'];
+            $fathers_full_name         = $_POST['ffname'] . ' ' . $_POST['fmname'] . ' ' . $_POST['flname'];
+            $mothers_full_name         = $_POST['mfname'] . ' ' . $_POST['mmname'] . ' ' . $_POST['mlname'];
 
-            if (!$stmt->execute()) {
-                throw new Exception("Execute failed: " . $stmt->error);
+            if ($stmt->execute()) {
+                // header("Location: success.php"); // Redirect to a success page
+                echo "<h1>saved successfully</h1>";
+                exit();
+            } else {
+                $errors['database'] = "Error: " . $stmt->error;
             }
 
             $stmt->close();
-            header("Location: success.php");
-            exit();
-
-        } catch (Exception $e) {
-            $errors['database'] = "Database Error: " . $e->getMessage();
         }
     }
-}
-$conn->close();
+    $conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -189,8 +177,8 @@ $conn->close();
                 <div class="title">
                     <h1>Personal Data Form</h1>
                 </div>
-                <?php 
-            if ($debug): ?>
+                <?php
+                if ($debug): ?>
                 <div class="test-buttons">
                     <button class="test-btn filled" type="button" onclick="fillForm()">Fill All Fields</button>
                 </div>
@@ -202,7 +190,7 @@ $conn->close();
                             <label for="lname">Last Name <span class="text-danger">*</span></label>
                             <input type="text" name="lname" id="lname" placeholder="Enter last name"
                                 value="<?php echo $_POST['lname'] ?? ''; ?>"
-                                class="<?php echo isset($errors['lname']) ? 'error' : '' ?>" >
+                                class="<?php echo isset($errors['lname']) ? 'error' : '' ?>">
                             <span class="error-feedback text-danger"><?php echo $errors['lname'] ?? ''; ?></span>
                         </div>
 
@@ -210,7 +198,7 @@ $conn->close();
                             <label for="fname">First Name <span class="text-danger">*</span></label> <br>
                             <input type="text" name="fname" id="fname" placeholder="Enter first name"
                                 value="<?php echo $_POST['fname'] ?? ''; ?>"
-                                class="<?php echo isset($errors['fname']) ? 'error' : '' ?>" >
+                                class="<?php echo isset($errors['fname']) ? 'error' : '' ?>">
                             <span class="error-feedback text-danger"><?php echo $errors['fname'] ?? ''; ?></span>
                         </div>
 
@@ -227,20 +215,23 @@ $conn->close();
                                 value="<?php echo htmlspecialchars($_POST['dob'] ?? '') ?>"
                                 class="<?php echo isset($errors['dob']) ? 'error' : '' ?>">
                             <span class="error-feedback text-danger"><?php echo $errors['dob'] ?? '' ?></span>
-                        </div>   
+                        </div>
 
                         <div class="form">
                             <label>Sex <span class="text-danger">*</span></label> <br>
-                            <div class="radio-group">
+                            <div class="radio-group">a
                                 <input type="radio" name="sex" id="male" value="male"
-                                    <?php if (isset($_POST['sex']) && $_POST['sex'] == 'male') echo 'checked'; ?>
-                                    >
+                                    <?php if (isset($_POST['sex']) && $_POST['sex'] == 'male') { echo 'checked'; }?>>
                                 <label for="male">Male</label>
-                                <input type="radio" name="sex" id="female" value="female"
-                                    <?php if (isset($_POST['sex']) && $_POST['sex'] == 'female') echo 'checked'; ?>>
+                                <input type="radio" name="sex" id="female" value="female" <?php if (isset($_POST['sex']) && $_POST['sex'] == 'female') {
+                                                                                                  echo 'checked';
+                                                                                          }
+                                                                                          ?>>
                                 <label for="female">Female</label>
-                                <input type="radio" name="sex" id="other" value="other"
-                                    <?php if (isset($_POST['sex']) && $_POST['sex'] == 'other') echo 'checked'; ?>>
+                                <input type="radio" name="sex" id="other" value="other" <?php if (isset($_POST['sex']) && $_POST['sex'] == 'other') {
+                                                                                                echo 'checked';
+                                                                                        }
+                                                                                        ?>>
                                 <label for="other">Other</label>
                             </div>
                             <span class="error-feedback text-danger"><?php echo $errors['sex'] ?? ''; ?></span>
@@ -248,21 +239,31 @@ $conn->close();
                         <div class="form">
                             <label for="status">Civil Status <span class="text-danger">*</span></label> <br>
                             <div class="form-group-radio">
-                                <select name="status" id="status" onchange="toggleOtherStatus()" >
-                                    <option value="single"
-                                        <?php if (isset($_POST['status']) && $_POST['status'] == 'single') echo 'selected'; ?>>
+                                <select name="status" id="status" onchange="toggleOtherStatus()">
+                                    <option value="single" <?php if (isset($_POST['status']) && $_POST['status'] == 'single') {
+                                                                   echo 'selected';
+                                                           }
+                                                           ?>>
                                         Single</option>
-                                    <option value="married"
-                                        <?php if (isset($_POST['status']) && $_POST['status'] == 'married') echo 'selected'; ?>>
+                                    <option value="married" <?php if (isset($_POST['status']) && $_POST['status'] == 'married') {
+                                                                    echo 'selected';
+                                                            }
+                                                            ?>>
                                         Married</option>
-                                    <option value="widowed"
-                                        <?php if (isset($_POST['status']) && $_POST['status'] == 'widowed') echo 'selected'; ?>>
+                                    <option value="widowed" <?php if (isset($_POST['status']) && $_POST['status'] == 'widowed') {
+                                                                    echo 'selected';
+                                                            }
+                                                            ?>>
                                         Widowed</option>
-                                    <option value="divorced"
-                                        <?php if (isset($_POST['status']) && $_POST['status'] == 'divorced') echo 'selected'; ?>>
+                                    <option value="divorced" <?php if (isset($_POST['status']) && $_POST['status'] == 'divorced') {
+                                                                     echo 'selected';
+                                                             }
+                                                             ?>>
                                         Legally Separated</option>
-                                    <option value="others"
-                                        <?php if (isset($_POST['status']) && $_POST['status'] == 'others') echo 'selected'; ?>>
+                                    <option value="others" <?php if (isset($_POST['status']) && $_POST['status'] == 'others') {
+                                                                   echo 'selected';
+                                                           }
+                                                           ?>>
                                         Others</option>
                                 </select>
                                 <input type="text" id="otherStatus" name="otherStatus" placeholder="Enter civil status"
@@ -285,7 +286,7 @@ $conn->close();
                         <div class="form">
                             <label for="nationality">Nationality <span class="text-danger">*</span></label> <br>
                             <input type="text" name="nationality" id="nationality" placeholder="Enter nationality"
-                                value="<?php echo htmlspecialchars($_POST['nationality'] ?? '') ?>" 
+                                value="<?php echo htmlspecialchars($_POST['nationality'] ?? '') ?>"
                                 class="<?php echo isset($errors['nationality']) ? 'error' : '' ?>">
                             <span class="error-feedback text-danger"><?php echo $errors['nationality'] ?? ''; ?></span>
                         </div>
@@ -296,17 +297,17 @@ $conn->close();
                                 value="<?php echo htmlspecialchars($_POST['religion'] ?? '') ?>"
                                 class="<?php echo isset($errors['religion']) ? 'error' : '' ?>">
                             <span class="error-feedback text-danger"><?php echo $errors['religion'] ?? ''; ?></span>
-                        </div>   
+                        </div>
                         <div class="long">
                             <div class="form">
                                 <label for="pob">Place of Birth <span class="text-danger">*</span></label> <br>
                                 <input type="text" name="pob" id="pob" placeholder="Enter place of birth"
                                     value="<?php echo htmlspecialchars($_POST['pob'] ?? '') ?>"
-                                    class="<?php echo isset($errors['pob']) ? 'error' : '' ?>" >
+                                    class="<?php echo isset($errors['pob']) ? 'error' : '' ?>">
                                 <span class="error-feedback text-danger"><?php echo $errors['pob'] ?? ''; ?></span>
                             </div>
                         </div>
-                       
+
                     </div>
                 </div>
                 <!-- location details -->
@@ -316,7 +317,7 @@ $conn->close();
                         <div class="form">
                             <label for="region">Region <span class="text-danger">*</span></label> <br>
                             <select id="region" name="region"
-                                class="<?php echo isset($errors['region']) ? 'error' : ''; ?>" >
+                                class="<?php echo isset($errors['region']) ? 'error' : ''; ?>">
                                 <option value="">Select Region</option>
                             </select>
                             <input type="hidden" name="region_name" id="region_name"
@@ -326,7 +327,7 @@ $conn->close();
                         <div class="form">
                             <label for="province">Province <span class="text-danger">*</span></label> <br>
                             <select id="province" name="province"
-                                class="<?php echo isset($errors['province']) ? 'error' : ''; ?>" disabled >
+                                class="<?php echo isset($errors['province']) ? 'error' : ''; ?>" disabled>
                                 <option value="">Select Province</option>
                             </select>
                             <input type="hidden" name="province_name" id="province_name"
@@ -335,7 +336,7 @@ $conn->close();
                         </div>
                         <div class="form">
                             <label for="city">City/Municipality <span class="text-danger">*</span></label> <br>
-                            <select id="city" name="city" disabled 
+                            <select id="city" name="city" disabled
                                 class="<?php echo isset($errors['city']) ? 'error' : ''; ?>">
                                 <option value="">Select City/Municipality</option>
                             </select>
@@ -345,7 +346,7 @@ $conn->close();
                         </div>
                         <div class="form">
                             <label for="barangay">Barangay <span class="text-danger">*</span></label> <br>
-                            <select id="barangay" name="barangay" disabled 
+                            <select id="barangay" name="barangay" disabled
                                 class="<?php echo isset($errors['barangay']) ? 'error' : ''; ?>">
                                 <option value="">Select Barangay</option>
                             </select>
@@ -357,7 +358,7 @@ $conn->close();
                         <div class="form">
                             <label for="zip">Zip Code <span class="text-danger">*</span></label> <br>
                             <input type="text" name="zip" id="zip" placeholder="Enter zip code"
-                                value="<?php echo $_POST['zip'] ?? ''; ?>" 
+                                value="<?php echo $_POST['zip'] ?? ''; ?>"
                                 class="<?php echo isset($errors['zip']) ? 'error' : '' ?>">
                             <span class="error-feedback text-danger"><?php echo $errors['zip'] ?? ''; ?></span>
                         </div>
@@ -366,7 +367,7 @@ $conn->close();
                             <label for="complete-address">Home Address <span class="text-danger">*</span></label> <br>
                             <input type="text" name="complete-address" id="complete-address"
                                 placeholder="Street Name, Building, House No."
-                                value="<?php echo $_POST['complete-address'] ?? ''; ?>" 
+                                value="<?php echo $_POST['complete-address'] ?? ''; ?>"
                                 class="<?php echo isset($errors['complete-address']) ? 'error' : '' ?>">
                             <span
                                 class="error-feedback text-danger"><?php echo $errors['complete-address'] ?? ''; ?></span>
@@ -384,7 +385,7 @@ $conn->close();
                         <div class="form">
                             <label for="phone-number">Phone Number <span class="text-danger">*</span></label> <br>
                             <input type="number" name="phone-number" id="phone-number" placeholder="Enter phone number"
-                                 value="<?php echo $_POST['phone-number'] ?? ''; ?>"
+                                value="<?php echo $_POST['phone-number'] ?? ''; ?>"
                                 class="<?php echo isset($errors['phone-number']) ? 'error' : '' ?>">
                             <span class="error-feedback text-danger"><?php echo $errors['phone-number'] ?? ''; ?></span>
                         </div>
@@ -463,5 +464,10 @@ $conn->close();
 <script src="js/fill.js"></script>
 <script src="js/regions.js"></script>
 <script src="js/civil-status.js"></script>
-<script>if (window.history.replaceState) { window.history.replaceState(null, null, window.location.href)}</script>
+<script>
+if (window.history.replaceState) {
+    window.history.replaceState(null, null, window.location.href)
+}
+</script>
+
 </html>
