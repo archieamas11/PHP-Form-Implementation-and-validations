@@ -1,5 +1,5 @@
 <?php
-    include_once "include/database.php";
+    include_once "config/database.php";
     $debug = true;
     session_start();
     $errors    = [];
@@ -123,8 +123,8 @@
         // If no errors, store data in database
         if (empty($errors)) {
             // Prepare and bind
-            $stmt = $conn->prepare("INSERT INTO tbl_users (user_full_name, date_of_birth, sex, civil_status, tax_identification_number, nationality, religion, place_of_birth, phone_number, email_address, telephone_number, region, province, municipality, barangay, home_address, zip_code, fathers_full_name, mothers_full_name, date_created) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-            $stmt->bind_param("sssssssssssssssssss", $user_full_name, $date_of_birth, $sex, $civil_status, $tax_identification_number, $nationality, $religion, $place_of_birth, $phone_number, $email_address, $telephone_number, $region, $province, $municipality, $barangay, $complete_address, $zip_code, $fathers_full_name, $mothers_full_name);
+            $stmt = $conn->prepare("INSERT INTO tbl_users (user_full_name, date_of_birth, sex, civil_status, tax_identification_number, nationality, religion, place_of_birth, phone_number, email_address, telephone_number, region, region_code, province, province_code, municipality, municipality_code, barangay, barangay_code, home_address, zip_code, fathers_full_name, mothers_full_name, date_created) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+            $stmt->bind_param("sssssssssssssssssssssss", $user_full_name, $date_of_birth, $sex, $civil_status, $tax_identification_number, $nationality, $religion, $place_of_birth, $phone_number, $email_address, $telephone_number, $region, $region_code, $province, $province_code, $municipality, $municipality_code, $barangay, $barangay_code, $complete_address, $zip_code, $fathers_full_name, $mothers_full_name);
             // Set parameters and execute
             $user_full_name            = $_POST['fname'] . ' ' . $_POST['mname'] . ' ' . $_POST['lname'];
             $date_of_birth             = $_POST['dob'];
@@ -138,9 +138,13 @@
             $email_address             = $_POST['email-address'];
             $telephone_number          = $_POST['tel'];
             $region                    = $_POST['region_name'];
+            $region_code               = $_POST['region'];
             $province                  = $_POST['province_name'];
+            $province_code             = $_POST['province'];
             $municipality              = $_POST['city_name'];
+            $municipality_code         = $_POST['city'];
             $barangay                  = $_POST['barangay_name'];
+            $barangay_code             = $_POST['barangay'];
             $complete_address          = $_POST['complete-address'];
             $zip_code                  = $_POST['zip'];
             $fathers_full_name         = $_POST['ffname'] . ' ' . $_POST['fmname'] . ' ' . $_POST['flname'];
@@ -180,6 +184,7 @@
                 <?php
                 if ($debug): ?>
                 <div class="test-buttons">
+                    <button type="reset" class="reset-btn">Clear</button>
                     <button class="test-btn filled" type="button" onclick="fillForm()">Fill All Fields</button>
                 </div>
                 <?php endif; ?>

@@ -1,5 +1,5 @@
 <?php
-require_once "include/database.php";
+require_once "config/database.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_POST['user_id'];

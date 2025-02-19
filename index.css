@@ -23,11 +23,18 @@ body {
     line-height: 1.6;
 }
 
+.test-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
 .test-buttons button {
-    background-color: var(--primary-color);
-    color: var(--white-color);
+    background-color: transparent;
+    color: var(--primary-color);
+    border: solid 1px var(--primary-color);
     padding: 1rem 2rem;
-    border: none;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -35,8 +42,13 @@ body {
     margin-bottom: 20px;
 }
 
+.test-buttons button[type="reset"]:hover {
+    color: var(--error-color);
+    border: solid 1px var(--error-color);
+    transform: translateY(-2px);
+}
+
 .test-buttons button:hover {
-    background-color: var(--secondary-color);
     transform: translateY(-2px);
 }
 
@@ -159,6 +171,7 @@ input[type="radio"] {
     width: 18px;
     height: 18px;
     cursor: pointer;
+    accent-color: var(--primary-color);
 }
 
 input[type="radio"]+label {
@@ -176,7 +189,7 @@ input[type="radio"]+label {
     margin-top: 2rem;
 }
 
-button {
+.submit-btn button {
     background-color: var(--primary-color);
     color: var(--white-color);
     padding: 1rem 2.5rem;

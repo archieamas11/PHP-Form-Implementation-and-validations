@@ -4,7 +4,7 @@ header('Access-Control-Allow-Origin: *'); // Allow requests from any origin (DO 
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS'); // Allowed methods
 header('Access-Control-Allow-Headers: Content-Type'); // Allowed headers
 
-require_once 'include/database.php';
+require_once 'config/database.php';
 
 header('Content-Type: application/json');
 error_reporting(E_ALL);
