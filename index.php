@@ -123,8 +123,8 @@
         // If no errors, store data in database
         if (empty($errors)) {
             // Prepare and bind
-            $stmt = $conn->prepare("INSERT INTO tbl_users (user_full_name, date_of_birth, sex, civil_status, tax_identification_number, nationality, religion, place_of_birth, phone_number, email_address, telephone_number, region, province, municipality, barangay, zip_code, fathers_full_name, mothers_full_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssssssssssssssss", $user_full_name, $date_of_birth, $sex, $civil_status, $tax_identification_number, $nationality, $religion, $place_of_birth, $phone_number, $email_address, $telephone_number, $region, $province, $municipality, $barangay, $zip_code, $fathers_full_name, $mothers_full_name);
+            $stmt = $conn->prepare("INSERT INTO tbl_users (user_full_name, date_of_birth, sex, civil_status, tax_identification_number, nationality, religion, place_of_birth, phone_number, email_address, telephone_number, region, province, municipality, barangay, home_address, zip_code, fathers_full_name, mothers_full_name, date_created) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+            $stmt->bind_param("sssssssssssssssssss", $user_full_name, $date_of_birth, $sex, $civil_status, $tax_identification_number, $nationality, $religion, $place_of_birth, $phone_number, $email_address, $telephone_number, $region, $province, $municipality, $barangay, $complete_address, $zip_code, $fathers_full_name, $mothers_full_name);
             // Set parameters and execute
             $user_full_name            = $_POST['fname'] . ' ' . $_POST['mname'] . ' ' . $_POST['lname'];
             $date_of_birth             = $_POST['dob'];
@@ -141,21 +141,21 @@
             $province                  = $_POST['province_name'];
             $municipality              = $_POST['city_name'];
             $barangay                  = $_POST['barangay_name'];
+            $complete_address          = $_POST['complete-address'];
             $zip_code                  = $_POST['zip'];
             $fathers_full_name         = $_POST['ffname'] . ' ' . $_POST['fmname'] . ' ' . $_POST['flname'];
             $mothers_full_name         = $_POST['mfname'] . ' ' . $_POST['mmname'] . ' ' . $_POST['mlname'];
 
             if ($stmt->execute()) {
-                // header("Location: success.php"); // Redirect to a success page
-                echo "<h1>saved successfully</h1>";
-                exit();
+            echo "<h1>saved successfully</h1>";
+            exit();
             } else {
-                $errors['database'] = "Error: " . $stmt->error;
+            $errors['database'] = "Error: " . $stmt->error;
             }
 
             $stmt->close();
         }
-    }
+        }
     $conn->close();
 ?>
 
@@ -219,7 +219,7 @@
 
                         <div class="form">
                             <label>Sex <span class="text-danger">*</span></label> <br>
-                            <div class="radio-group">a
+                            <div class="radio-group">
                                 <input type="radio" name="sex" id="male" value="male"
                                     <?php if (isset($_POST['sex']) && $_POST['sex'] == 'male') { echo 'checked'; }?>>
                                 <label for="male">Male</label>

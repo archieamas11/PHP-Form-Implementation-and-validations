@@ -1,0 +1,111 @@
+/* table.css */
+
+/* General table styling */
+#myTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-width: 800px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Table header styling */
+#myTable thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+#myTable th,
+#myTable td {
+    padding: 12px 15px;
+}
+
+/* Table body styling */
+#myTable tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+#myTable tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+#myTable tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+#myTable tbody tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+/* Action buttons styling */
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn.icon {
+    color: #009879;
+    font-size: 1.2em;
+    transition: color 0.3s ease;
+}
+
+.btn.icon:hover {
+    color: #007f63;
+}
+
+/* Basic modal styles */
+/* Modal Styles */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: solid;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    width: 75%;
+    border-radius: 10px;
+    border: solid 1px #009879;
+    max-height: 75vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.content-wrapper {
+    padding: 20px;
+    background-color: white;
+}
+
+.modal-title {
+    margin: 0;
+    line-height: 10px;
+    margin-bottom: 25px;
+}
+
+.close {
+    display: none;
+}
+
+.close-btn {
+    display: flex;
+}
+
+
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #myTable {
+        display: block;
+        overflow-x: auto;
+    }
+}
