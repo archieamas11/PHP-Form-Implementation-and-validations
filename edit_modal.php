@@ -126,7 +126,7 @@
                     </div>
                 </div>
                 <div class="submit-btn close-btn">
-                    <button type="button" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="close closeBtn">Cancel</button>
                     <button type="submit">Save Changes</button>
                 </div>
             </form>

@@ -26,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         http_response_code(404); // Not Found
         echo json_encode(['error' => 'User not found']);
     }
-
     mysqli_stmt_close($stmt);
 } else {
     http_response_code(400); // Bad Request
