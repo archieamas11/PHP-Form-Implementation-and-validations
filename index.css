@@ -142,6 +142,18 @@ select {
     transition: all 0.3s ease;
 }
 
+/* Change appearance */
+select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Add loading indicator */
+select[disabled] {
+    background: url('loading-spinner.gif') no-repeat right center;
+}
+
 input:focus,
 select:focus {
     outline: none;

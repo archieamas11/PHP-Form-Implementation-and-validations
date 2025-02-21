@@ -1,6 +1,6 @@
 <!-- Edit Modal -->
 <div id="editModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content p-3">
         <div class="content-wrapper">
             <div class="modal-title">
                 <h1>Edit User</h1>
@@ -38,9 +38,9 @@
                     <div class="form">
                         <label>Sex</label> <br>
                         <div class="radio-group">
-                            <input type="radio" name="sex" value="Male" id="edit-sex-male" required>
+                            <input type="radio" name="sex" value="male" id="edit-sex-male" required>
                             <label for="edit-sex-male">Male</label>
-                            <input type="radio" name="sex" value="Female" id="edit-sex-female" required>
+                            <input type="radio" name="sex" value="female" id="edit-sex-female" required>
                             <label for="edit-sex-female">Female</label>
                         </div>
                     </div>
@@ -76,7 +76,7 @@
                     <!-- Address Section -->
                     <div class="form">
                         <label>Region</label>
-                        <select id="edit-region" name="region_code" class="form-control" required
+                        <select id="edit-region" name="region_code" class="form-control" 
                             onchange="loadProvinces(this.value)">
                             <option value="">Loading regions...</option>
                         </select>
@@ -84,7 +84,7 @@
 
                     <div class="form">
                         <label>Province</label>
-                        <select id="edit-province" name="province_code" class="form-control" required
+                        <select id="edit-province" name="province_code" class="form-control" 
                             onchange="loadMunicipalities(this.value)">
                             <option value="">Select region first</option>
                         </select>
@@ -92,7 +92,7 @@
 
                     <div class="form">
                         <label>Municipality</label>
-                        <select id="edit-municipality" name="municipality_code" class="form-control" required
+                        <select id="edit-municipality" name="municipality_code" class="form-control" 
                             onchange="loadBarangays(this.value)">
                             <option value="">Select province first</option>
                         </select>
@@ -100,7 +100,7 @@
 
                     <div class="form">
                         <label>Barangay</label>
-                        <select id="edit-barangay" name="barangay_code" class="form-control" required>
+                        <select id="edit-barangay" name="barangay_code" class="form-control" >
                             <option value="">Select municipality first</option>
                         </select>
                     </div>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Philippine Address Selector</title>
+</head>
+<body>
+    <form>
+        <!-- Region Selector -->
+        <div class="form-group">
+            <label for="edit-region">Region:</label>
+            <select id="edit-region" name="region" required>
+                <option value="">Select Region</option>
+            </select>
+        </div>
+
+        <!-- Province Selector -->
+        <div class="form-group">
+            <label for="edit-province">Province:</label>
+            <select id="edit-province" name="province" disabled required>
+                <option value="">Select Province</option>
+            </select>
+        </div>
+
+        <!-- Municipality Selector -->
+        <div class="form-group">
+            <label for="edit-municipality">Municipality:</label>
+            <select id="edit-municipality" name="municipality" disabled required>
+                <option value="">Select Municipality</option>
+            </select>
+        </div>
+
+        <!-- Barangay Selector -->
+        <div class="form-group">
+            <label for="edit-barangay">Barangay:</label>
+            <select id="edit-barangay" name="barangay" disabled required>
+                <option value="">Select Barangay</option>
+            </select>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+    // Paste the optimized JavaScript code here
+    document.addEventListener('DOMContentLoaded', () => {
+        const cache = new Map();
+        const selects = {
+            region: document.getElementById('edit-region'),
+            province: document.getElementById('edit-province'),
+            municipality: document.getElementById('edit-municipality'),
+            barangay: document.getElementById('edit-barangay')
+        };
+
+        async function loadData(url, target, resetChain = []) {
+            try {
+                target.disabled = true;
+                target.innerHTML = '<option value="">Loading...</option>';
+                
+                if (!cache.has(url)) {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    cache.set(url, await response.json());
+                }
+
+                const data = cache.get(url);
+                const fragment = document.createDocumentFragment();
+                
+                // Create default option
+                const defaultOption = new Option(`Select ${target.id.replace('edit-', '')}`, '');
+                fragment.appendChild(defaultOption);
+
+                // Add data options
+                data.forEach(item => {
+                    fragment.appendChild(new Option(item.name, item.code));
+                });
+
+                // Clear and update select
+                target.innerHTML = '';
+                target.appendChild(fragment);
+                target.disabled = false;
+
+                // Reset dependent selects
+                resetChain.forEach(select => {
+                    selects[select].innerHTML = `<option value="">Select ${select}</option>`;
+                    selects[select].disabled = true;
+                });
+            } catch (error) {
+                console.error(`Failed to load ${url}:`, error);
+                target.innerHTML = `<option value="">Error loading data</option>`;
+                target.disabled = false;
+            }
+        }
+
+        // Initialize regions
+        loadData('https://psgc.cloud/api/regions', selects.region, 
+                ['province', 'municipality', 'barangay']);
+
+        // Event listeners
+        selects.region.addEventListener('change', () => {
+            loadData(`https://psgc.cloud/api/regions/${selects.region.value}/provinces`,
+                    selects.province, ['municipality', 'barangay']);
+        });
+
+        selects.province.addEventListener('change', () => {
+            loadData(`https://psgc.cloud/api/provinces/${selects.province.value}/municipalities`,
+                    selects.municipality, ['barangay']);
+        });
+
+        selects.municipality.addEventListener('change', () => {
+            loadData(`https://psgc.cloud/api/municipalities/${selects.municipality.value}/barangays`,
+                    selects.barangay);
+        });
+    });
+    </script>
+
+    <!-- Optional: Add basic styling -->
+    <style>
+        .form-group {
+            margin: 15px 0;
+        }
+        select {
+            padding: 8px;
+            min-width: 250px;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+    </style>
+</body>
+</html>
